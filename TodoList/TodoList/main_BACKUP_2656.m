@@ -36,7 +36,10 @@
 }
 
 -(void)setItemDescription:(NSString *)itemDescription {
+//    char string[256];
+//    itemDescription = [NSString stringWithCString:string encoding:1];
     _itemDescription = itemDescription;
+    
 }
 
 -(NSString *)itemDescription {
@@ -233,6 +236,10 @@ int main(int argc, const char * argv[]) {
     @autoreleasepool {
 
         // insert code here...
+<<<<<<< HEAD
+        listItem *myItem = [[listItem alloc]init];
+        
+=======
 //        char string[256];
 //        scanf("%255s", &string);
 //        NSString *firstName = [NSString stringWithCString:string encoding:1];
@@ -286,6 +293,7 @@ int main(int argc, const char * argv[]) {
         //[myListManager showLists];
         [myListManager run];
 
+>>>>>>> 1cc80cb5748de3147c7e186a387196d343f146bf
     }
     return 0;
 }
