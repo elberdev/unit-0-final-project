@@ -9,6 +9,14 @@
 #import <Foundation/Foundation.h>
 
 @interface listItem : NSObject
+
+-(void)setItemDescription:(NSString *)itemDescription;
+-(NSString *)itemDescription;
+-(void)setPriority:(int)priority;
+-(int)priority;
+-(void)setDoneStatus:(BOOL)doneStatus;
+-(BOOL)doneStatus;
+
 @end
 
 @implementation listItem {
