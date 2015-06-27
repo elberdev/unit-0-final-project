@@ -10,6 +10,42 @@
 
 
 //*************************** listItem class *********************************//
+@interface ListManager : NSObject
+-(void)run;
+@end
+
+@implementation ListManager
+
+-(void)run {
+    BOOL programIsRunning = YES;
+    while (programIsRunning) {
+        printf("Welcome to the Elbo-Yucatan To-Do List Manager. Please select an option. \n 0) Exit program \n 1) Show my active to-do lists \n 2) Create a new to-do list \n 3) Edit a to-do list");
+        int input;
+        scanf("%d%*c", &input);
+        switch (input) {
+            case 0:
+                programIsRunning = NO;
+                break;
+            case 1:
+                // show your lists
+                break;
+            case 2:
+                //create to-do list
+                break;
+            case 3:
+                //edit to-do list
+                break;
+            default:
+                printf("You have selected an invalid option.");
+                break;
+                
+        }
+    }
+}
+
+@end
+
+
 @interface ListItem : NSObject
 
 -(void)setItemDescription:(NSString *)itemDescription;
@@ -70,13 +106,21 @@
 -(NSMutableArray *)listArray;
 -(void)removeListItem:(int)index;
 -(void)editListItem:(int)index withString:(NSString *)string;
+-(void)setName:(NSString*)name;
+-(NSString*)name;
 
 @end
 
 @implementation List {
+    NSString *_name;
     NSMutableArray *_listArray;
 }
-
+-(void)setName:(NSString*)name {
+    _name = name;
+}
+-(NSString*)name {
+    return _name;
+}
 -(void)addListItem:(ListItem *)listItem {
     if (_listArray == nil) {
         _listArray = [[NSMutableArray alloc] init];
@@ -155,6 +199,8 @@ int main(int argc, const char * argv[]) {
         for(int i = 0; i < [arrayList count]; i++) {
             NSLog(@"%@", [arrayList[i] itemDescription]);
         }
+        ListManager *myListManager = [[ListManager alloc]init];
+        [myListManager run];
 
     }
     return 0;
