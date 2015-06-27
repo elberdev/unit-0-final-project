@@ -61,8 +61,13 @@
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
-        
-        
+
+        // insert code here...
+        char string[256];
+        scanf("%255s", &string);
+        NSString *firstName = [NSString stringWithCString:string encoding:1];
+        NSLog(@"%@", firstName);
+
     }
     return 0;
 }
