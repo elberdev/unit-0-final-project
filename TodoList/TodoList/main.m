@@ -103,7 +103,7 @@
     if (index < [_listArray count]) {
         [_listArray removeObjectAtIndex:index];
     } else {
-        NSLog(@"The list item you input does not exist");
+        printf("The list item you input does not exist\n");
     }
 }
 
@@ -290,24 +290,39 @@
     [self commandTree:[self parse]];
 }
 
--(void)displayItems:(NSString *)listName {
+-(void)displayItems:(NSString *)listName withPrompt:(BOOL)prompt{
     List *list = [self getListByName:listName];
     NSArray *array = [list listArray];
     for (int i = 0; i < [array count]; i++) {
         printf("\n        %d) %s\n", i, [[array[i] itemDescription] UTF8String]);
     }
-    [self commandTree:[self parse]];
+    if (prompt == YES) {
+       [self commandTree:[self parse]];
+    }
+    
 }
 -(void)deleteItems:(NSString *)listName {
-    [self displayList:listName];
+    [self getListByName:listName];
     while (true) {
+        [self displayItems:listName withPrompt:NO];
         printf("Please select an item to be deleted:\n");
         int input;
         scanf("%d%*c", &input);
         fpurge(stdin);
+        [[self getListByName:listName] removeListItem:input];
+        printf("Do you want to continue item deletion? y/n");
+        NSString *deletion = [self parse];
+        if ([deletion isEqualToString:@"y"]) {
+            continue;
+        } else if ([deletion isEqualToString:@"n"]) {
+            break;
+        } else {
+            printf("Invalid command.");
+        }
         
         
     }
+               [self commandTree:[self parse]];
 }
 -(NSString *)snip:(NSString *)toDelete fromCommand:(NSString *)command {
     command = [command stringByReplacingOccurrencesOfString:toDelete
@@ -330,7 +345,7 @@
     } else if ([command containsString:@"new item in "]) {
         [self newItem:[self snip:@"new item in " fromCommand:command]];
     } else if ([command containsString:@"display items in "]) {
-        [self displayItems:[self snip:@"display items in " fromCommand:command]];
+        [self displayItems:[self snip:@"display items in " fromCommand:command] withPrompt:YES];
     } else if ([command containsString:@"delete items in "]) {
         [self deleteItems:[self snip:@"delete items in " fromCommand:command]];
     } else if ([command isEqualToString:@"exit"]) {
