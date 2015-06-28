@@ -25,6 +25,7 @@
     NSString *_itemDescription;
     int _priority;
     BOOL _doneStatus;
+    NSDate *_dueDate;
 }
 
 -(id)init {
@@ -89,16 +90,10 @@
 }
 
 -(void)addListItem:(ListItem *)listItem {
-//    if (_listArray == nil) {
-//        _listArray = [[NSMutableArray alloc] init];
-//    }
     [self.listArray addObject:listItem];
 }
 
 -(void)removeListItem:(int)index {
-//    if (_listArray == nil) {
-//        _listArray = [[NSMutableArray alloc] init];
-//    }
     
     if (index < [self.listArray count]) {
         [self.listArray removeObjectAtIndex:index];
@@ -108,9 +103,6 @@
 }
 
 -(void)editListItem:(int)index withString:(NSString *)string {
-//    if (_listArray == nil) {
-//        _listArray = [[NSMutableArray alloc] init];
-//    }
     
     if (index < [self.listArray count]) {
         [[self.listArray objectAtIndex:index] setItemDescription:string];
@@ -121,9 +113,7 @@
 }
 
 -(NSUInteger)showNumberOfItems {
-//    if (_listArray == nil) {
-//        _listArray = [[NSMutableArray alloc] init];
-//    }
+    
     return [self.listArray count];
 }
 
@@ -328,6 +318,25 @@
                [self commandTree:[self parse]];
 }
 
+-(void)displayAllItems:(NSString *)order {
+    
+    NSMutableArray *combinedList = [[NSMutableArray alloc] init];
+    for (int i = 0; i < [_listDatabase count]; i++) {
+        for (int j = 0; j < [_listDatabase[i] count]; j++) {
+            [combinedList addObject:[_listDatabase[i] objectAtIndex:j]];
+        }
+    }
+    
+    if([order isEqualTo:@"urgent first"]) {
+        for (int i = 1; i <= 4; i++) {
+            for (int j = 0; j < [combinedList count]; j++) {
+                
+            }
+        }
+    }
+    
+}
+
 -(NSString *)snip:(NSString *)toDelete fromCommand:(NSString *)command {
     command = [command stringByReplacingOccurrencesOfString:toDelete
                                                  withString:@""];
@@ -353,6 +362,8 @@
                 withPrompt:YES];
     } else if ([command containsString:@"delete items in "]) {
         [self deleteItems:[self snip:@"delete items in " fromCommand:command]];
+    } else if ([command containsString:@"display all items "]) {
+        [self displayAllItems:[self snip:@"display all items " fromCommand:command]];
     } else if ([command isEqualToString:@"exit"]) {
         exit(0);
     } else {
@@ -397,6 +408,10 @@
     printf("\n      new item in <list name>\n");
     printf("\n      display items in <list name>\n");
     printf("\n      delete items in <list name>\n");
+    printf("\n      display all items urgent first");
+    printf("\n      display all items urgent last");
+    printf("\n      display all items closest date first");
+    printf("\n      display all items closest date last");
     printf("\n      exit \n\n");
     [self commandTree:[self parse]];
 }
