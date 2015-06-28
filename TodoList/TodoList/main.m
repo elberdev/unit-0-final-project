@@ -209,30 +209,10 @@
     List *list = [[List alloc] init];
     
     [list setName:newListName];
-    [self addList: list];
+    [self addList:list];
     printf("\n\n  A NEW LIST HAS BEEN CREATED:\n");
     printf("\n      %s\n\n", [newListName UTF8String]);
     
-    [self commandTree:[self parse]];
-}
-
--(void)newItem:(NSString *)listName {
-    [self getListByName:listName];
-    ListItem *newItem = [[ListItem alloc]init];
-    
-    printf("\n\n  CREATING NEW ITEM IN LIST %s\n", [listName UTF8String]);
-    printf("\n    Input to do item description: \n");
-    NSString *description = [self parse];
-    [newItem setItemDescription:description];
-    printf("\n    Input item priority from 1 (most pressing) to 4 (least pressing)\n");
-    int priority;
-    scanf("%d%*c", &priority);
-    fpurge(stdin);
-    [newItem setPriority:priority];
-    [[[self getListByName:listName] listArray] addObject:newItem];
-    
-    
-    printf("\n    to do item created successfully\n\n");
     [self commandTree:[self parse]];
 }
 
@@ -289,22 +269,42 @@
     [self commandTree:[self parse]];
 }
 
--(void)displayItems:(NSString *)listName {//withPrompt:(BOOL)prompt{
+-(void)newItem:(NSString *)listName {
+    [self getListByName:listName];
+    ListItem *newItem = [[ListItem alloc]init];
+    
+    printf("\n\n  CREATING NEW ITEM IN LIST %s\n", [listName UTF8String]);
+    printf("\n    Input to do item description: \n");
+    NSString *description = [self parse];
+    [newItem setItemDescription:description];
+    printf("\n    Input item priority from 1 (most pressing) to 4 (least pressing)\n");
+    int priority;
+    scanf("    %d%*c", &priority);
+    fpurge(stdin);
+    [newItem setPriority:priority];
+    [[[self getListByName:listName] listArray] addObject:newItem];
+    
+    printf("\n    to do item created successfully\n\n");
+    [self commandTree:[self parse]];
+}
+
+-(void)displayItems:(NSString *)listName withPrompt:(BOOL)prompt{
     List *list = [self getListByName:listName];
     NSMutableArray *array = [list listArray];
     for (int i = 0; i < [array count]; i++) {
         printf("\n        %d) %s\n", i, [[array[i] itemDescription] UTF8String]);
     }
     printf("\n");
-    //if (prompt == YES) {
+    if (prompt == YES) {
        [self commandTree:[self parse]];
-    //}
+    }
     
 }
+
 -(void)deleteItems:(NSString *)listName {
     [self getListByName:listName];
     while (true) {
-        [self displayItems:listName];// withPrompt:NO];
+        [self displayItems:listName withPrompt:NO];
         printf("Please select an item to be deleted:\n");
         int input;
         scanf("%d%*c", &input);
@@ -324,6 +324,7 @@
     }
                [self commandTree:[self parse]];
 }
+
 -(NSString *)snip:(NSString *)toDelete fromCommand:(NSString *)command {
     command = [command stringByReplacingOccurrencesOfString:toDelete
                                                  withString:@""];
@@ -345,7 +346,8 @@
     } else if ([command containsString:@"new item in "]) {
         [self newItem:[self snip:@"new item in " fromCommand:command]];
     } else if ([command containsString:@"display items in "]) {
-        [self displayItems:[self snip:@"display items in " fromCommand:command]]; //withPrompt:YES];
+        [self displayItems:[self snip:@"display items in " fromCommand:command]
+                withPrompt:YES];
     } else if ([command containsString:@"delete items in "]) {
         [self deleteItems:[self snip:@"delete items in " fromCommand:command]];
     } else if ([command isEqualToString:@"exit"]) {
@@ -386,11 +388,12 @@
 -(void)help {
     printf("\n\n  AVAILABLE COMMANDS:\n");
     printf("\n      new list <list name>\n");
-    printf("\n      delete list <list name / all>\n");
+    printf("\n      delete list <list name>\n");
     printf("\n      rename list <list name>\n");
     printf("\n      display list <list name / all>\n");
     printf("\n      new item in <list name>\n");
     printf("\n      display items in <list name>\n");
+    printf("\n      delete items in <list name>\n");
     printf("\n      exit \n\n");
     [self commandTree:[self parse]];
 }
