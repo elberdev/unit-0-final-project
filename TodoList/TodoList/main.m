@@ -140,7 +140,6 @@
 
 -(void)editList;
 -(void)run;
--(void)showLists;
 -(void)addList:(List *)list;
 -(List*)getListByName:(NSString*)listname;
 -(void)removeList:(NSString *)name;
@@ -149,36 +148,6 @@
 
 @implementation ListManager {
     NSMutableArray *_listDatabase;
-}
-
--(void)editList {
-    printf("Name of list to edit:");
-    char nameC[256];
-    scanf("%255s[^\n]%*c", nameC);
-    fpurge(stdin);
-    NSString *name = [NSString stringWithCString:nameC
-                                        encoding:NSUTF8StringEncoding];
-    int input;
-    List *tempList = [[List alloc]init];
-
-    printf("What would you like to do? \n 1) Edit list name \n 2) Delete list \n 3) Add an item to list \n 4) Delete an item from list");
-    scanf("%d", &input);
-    switch (input) {
-            
-        case 1:
-             tempList = [self getListByName:name];
-            if (tempList != nil) {
-                [tempList setName:@"hello"];
-            }
-            break;
-            
-        default:
-            printf("placeholder");
-            
-            
-            
-    }
-    
 }
 
 -(void)addList:(List *)list {
@@ -208,6 +177,7 @@
     }
     
 }
+
 -(List*)getListByName:(NSString*)listname {
     for (int i = 0; i < [_listDatabase count]; i++) {
         if ([listname isEqualToString:[_listDatabase[i] name]]) {
@@ -216,13 +186,6 @@
     }
     printf("There are no lists by that name.");
     return nil;
-}
-
--(void)showLists {
-    for (int i = 0; i < [_listDatabase count]; i++) {
-        printf("%s: %lu items\n", [[_listDatabase[i] name] UTF8String],
-               (unsigned long)[_listDatabase[i] showNumberOfItems]);
-    }
 }
 
 -(void)createList {
@@ -239,6 +202,14 @@
     [self addList: list];
     
 }
+/************************************************************************************/
+
+-(void)newList:(NSString *)listName {
+    printf("\n\n  A NEW LIST HAS BEEN CREATED:\n");
+    printf("\n      %s\n\n", [listName UTF8String]);
+    [self commandTree:[self parse]];
+}
+
 -(void)newItem:(NSString *)listName {
     printf("\n\n  CREATING NEW ITEM IN LIST %s\n", [listName UTF8String]);
     printf("\n    Input to do item description: \n");
@@ -248,24 +219,84 @@
     printf("\n    to do item created successfully\n\n");
     [self commandTree:[self parse]];
 }
+
+-(void)deleteList:(NSString *)listName {
+    
+    NSString *confirm;
+    
+    while (true) {
+        printf("\n\n  ARE YOU SURE YOU WANT TO DELETE LIST %s?\n",
+               [listName UTF8String]);
+        printf("\n    RE-ENTER THE LIST NAME TO CONFIRM or type 'cancel' to abort\n");
+        confirm = [self parse];
+        if ([confirm isEqualToString:listName]) {
+            printf("\n    LIST %s HAS BEEN DELETED.\n", [listName UTF8String]);
+            break;
+        } else if ([confirm isEqualToString:@"cancel"]) {
+            printf("\n    ABORTING DELETION.\n");
+            break;
+        } else {
+            printf("\n    list name mismatch.\n");
+        }
+    }
+
+    [self commandTree:[self parse]];
+    
+}
+
+-(void)renameList:(NSString *)listName {
+    printf("\n\n   PLEASE ENTER NEW NAME FOR LIST %s\n", [listName UTF8String]);
+    NSString *newName = [self parse];
+    printf("\n    List %s has been renamed %s\n", [listName UTF8String],
+           [newName UTF8String]);
+    [self commandTree:[self parse]];
+}
+
+-(void)displayList:(NSString *)listName {
+    
+    if ([listName isEqualToString:@"all"]) {
+        printf("\n\n  DISPLAYING ALL TO-DO LISTS\n");
+        for (int i = 0; i < [_listDatabase count]; i++) {
+            printf("\n    %s: %lu items\n", [[_listDatabase[i] name] UTF8String],
+                   (unsigned long)[_listDatabase[i] showNumberOfItems]);
+        }
+    } else {
+        printf("\n\n  DISPLAYING LIST %s\n", [listName UTF8String]);
+    }
+
+    [self commandTree:[self parse]];
+}
+
+-(void)displayItems:(NSString *)listName {
+    List *list = [self getListByName:listName];
+    NSArray *array = [list listArray];
+    for (int i = 0; i < [array count]; i++) {
+        printf("\n        %d) %s\n", i, [[array[i] itemDescription] UTF8String]);
+    }
+}
+
 -(NSString *)snip:(NSString *)toDelete fromCommand:(NSString *)command {
     command = [command stringByReplacingOccurrencesOfString:toDelete
                                                  withString:@""];
     
     return command;
 }
--(void)newList:(NSString *)listName {
-    printf("\n\n  A NEW LIST HAS BEEN CREATED:\n");
-    printf("\n      %s\n\n", [listName UTF8String]);
-    [self commandTree:[self parse]];
-}
+
 -(void)commandTree:(NSString *)command {
     if ([command isEqualToString:@"help"]) {
         [self help];
     } else if ([command containsString:@"new list "]) {
         [self newList:[self snip:@"new list " fromCommand:command]];
+    } else if ([command containsString:@"delete list "]) {
+        [self deleteList:[self snip:@"delete list " fromCommand:command]];
+    } else if ([command containsString:@"rename list "]) {
+        [self renameList:[self snip:@"rename list " fromCommand:command]];
+    } else if ([command containsString:@"display list "]) {
+        [self displayList:[self snip:@"display list " fromCommand:command]];
     } else if ([command containsString:@"new item in "]) {
         [self newItem:[self snip:@"new item in " fromCommand:command]];
+    } else if ([command containsString:@"display items in "]) {
+        [self displayItems:[self snip:@"display items in " fromCommand:command]];
     } else if ([command isEqualToString:@"exit"]) {
         exit(0);
     } else {
@@ -274,6 +305,7 @@
         [self commandTree:[self parse]];
     }
 }
+
 -(NSString *)parse {
     
     printf("\n    ");
@@ -299,16 +331,19 @@
     
     return command;
 }
+
 -(void)help {
     printf("\n\n  AVAILABLE COMMANDS:\n");
     printf("\n      new list <list name>\n");
-    printf("\n      new item in <list name>\n");
     printf("\n      delete list <list name / all>\n");
-    printf("\n      edit list <list name>\n");
-    printf("\n      display list <list name / all>\n\n");
+    printf("\n      rename list <list name>\n");
+    printf("\n      display list <list name / all>\n");
+    printf("\n      new item in <list name>\n");
+    printf("\n      display items in <list name>\n");
     printf("\n      exit \n\n");
     [self commandTree:[self parse]];
 }
+
 -(void)run {
     printf("\n  Welcome to the Elbo-Yucatan To-Do List Management System. \n");
     printf("\n    Type a command (or type 'help' for instructions)\n\n");
@@ -354,21 +389,22 @@ int main(int argc, const char * argv[]) {
         
         NSMutableArray *arrayList = [list listArray];
         
-        for(int i = 0; i < [arrayList count]; i++) {
-            NSLog(@"%@", [arrayList[i] itemDescription]);
-        }
+//        for(int i = 0; i < [arrayList count]; i++) {
+//            NSLog(@"%@", [arrayList[i] itemDescription]);
+//        }
         
         [list removeListItem:2];
         
-        for(int i = 0; i < [arrayList count]; i++) {
-            NSLog(@"%@", [arrayList[i] itemDescription]);
-        }
+//        for(int i = 0; i < [arrayList count]; i++) {
+//            NSLog(@"%@", [arrayList[i] itemDescription]);
+//        }
         
         [list editListItem:0 withString:@"elect Bernie Sanders president"];
         
-        for(int i = 0; i < [arrayList count]; i++) {
-            NSLog(@"%@", [arrayList[i] itemDescription]);
-        }
+//        for(int i = 0; i < [arrayList count]; i++) {
+//            NSLog(@"%@", [arrayList[i] itemDescription]);
+//        }
+        
         ListManager *myListManager = [[ListManager alloc]init];
         [myListManager addList:list];
         [myListManager addList:list2];
