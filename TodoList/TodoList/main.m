@@ -225,7 +225,6 @@
     NSString *description = [self parse];
     [newItem setItemDescription:description];
     printf("\n    Input item priority from 1 (most pressing) to 4 (least pressing)\n");
-    //    NSString *priority = [self parse];
     int priority;
     scanf("%d%*c", &priority);
     fpurge(stdin);
@@ -290,21 +289,22 @@
     [self commandTree:[self parse]];
 }
 
--(void)displayItems:(NSString *)listName withPrompt:(BOOL)prompt{
+-(void)displayItems:(NSString *)listName {//withPrompt:(BOOL)prompt{
     List *list = [self getListByName:listName];
-    NSArray *array = [list listArray];
+    NSMutableArray *array = [list listArray];
     for (int i = 0; i < [array count]; i++) {
         printf("\n        %d) %s\n", i, [[array[i] itemDescription] UTF8String]);
     }
-    if (prompt == YES) {
+    printf("\n");
+    //if (prompt == YES) {
        [self commandTree:[self parse]];
-    }
+    //}
     
 }
 -(void)deleteItems:(NSString *)listName {
     [self getListByName:listName];
     while (true) {
-        [self displayItems:listName withPrompt:NO];
+        [self displayItems:listName];// withPrompt:NO];
         printf("Please select an item to be deleted:\n");
         int input;
         scanf("%d%*c", &input);
@@ -345,14 +345,14 @@
     } else if ([command containsString:@"new item in "]) {
         [self newItem:[self snip:@"new item in " fromCommand:command]];
     } else if ([command containsString:@"display items in "]) {
-        [self displayItems:[self snip:@"display items in " fromCommand:command] withPrompt:YES];
+        [self displayItems:[self snip:@"display items in " fromCommand:command]]; //withPrompt:YES];
     } else if ([command containsString:@"delete items in "]) {
         [self deleteItems:[self snip:@"delete items in " fromCommand:command]];
     } else if ([command isEqualToString:@"exit"]) {
         exit(0);
     } else {
         printf("\n  NOT A RECOGNIZED COMMAND\n");
-        printf("    Type 'help' for available commands");
+        printf("\n    Type 'help' for available commands\n");
         [self commandTree:[self parse]];
     }
 }
@@ -437,8 +437,6 @@ int main(int argc, const char * argv[]) {
         [list2 addListItem:item5];
         [list2 addListItem:item6];
         [list2 setName:@"monty python"];
-        
-        NSMutableArray *arrayList = [list listArray];
         
 //        for(int i = 0; i < [arrayList count]; i++) {
 //            NSLog(@"%@", [arrayList[i] itemDescription]);
