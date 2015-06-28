@@ -89,31 +89,31 @@
 }
 
 -(void)addListItem:(ListItem *)listItem {
-    if (_listArray == nil) {
-        _listArray = [[NSMutableArray alloc] init];
-    }
-    [_listArray addObject:listItem];
+//    if (_listArray == nil) {
+//        _listArray = [[NSMutableArray alloc] init];
+//    }
+    [self.listArray addObject:listItem];
 }
 
 -(void)removeListItem:(int)index {
-    if (_listArray == nil) {
-        _listArray = [[NSMutableArray alloc] init];
-    }
+//    if (_listArray == nil) {
+//        _listArray = [[NSMutableArray alloc] init];
+//    }
     
-    if (index < [_listArray count]) {
-        [_listArray removeObjectAtIndex:index];
+    if (index < [self.listArray count]) {
+        [self.listArray removeObjectAtIndex:index];
     } else {
         printf("The list item you input does not exist\n");
     }
 }
 
 -(void)editListItem:(int)index withString:(NSString *)string {
-    if (_listArray == nil) {
-        _listArray = [[NSMutableArray alloc] init];
-    }
+//    if (_listArray == nil) {
+//        _listArray = [[NSMutableArray alloc] init];
+//    }
     
-    if (index < [_listArray count]) {
-        [[_listArray objectAtIndex:index] setItemDescription:string];
+    if (index < [self.listArray count]) {
+        [[self.listArray objectAtIndex:index] setItemDescription:string];
 
     } else {
         NSLog(@"The list item you input does not exist");
@@ -121,13 +121,16 @@
 }
 
 -(NSUInteger)showNumberOfItems {
-    if (_listArray == nil) {
-        _listArray = [[NSMutableArray alloc] init];
-    }
-    return [_listArray count];
+//    if (_listArray == nil) {
+//        _listArray = [[NSMutableArray alloc] init];
+//    }
+    return [self.listArray count];
 }
 
 -(NSMutableArray *)listArray {
+    if (_listArray == nil) {
+        _listArray = [[NSMutableArray alloc] init];
+    }
     return _listArray;
 }
 
