@@ -138,7 +138,7 @@
 //*************************** ListManager class *******************************//
 @interface ListManager : NSObject
 
--(void)editList;
+
 -(void)run;
 -(void)addList:(List *)list;
 -(List*)getListByName:(NSString*)listname;
@@ -166,7 +166,7 @@
     BOOL found = NO;
     
     for (int i = 0; i < [_listDatabase count]; i++) {
-        if ([_listDatabase[i] name] == name) {
+        if ([[_listDatabase[i] name] isEqualToString:name]) {
             [_listDatabase removeObjectAtIndex:i];
             found = YES;
         }
@@ -184,7 +184,8 @@
             return _listDatabase[i];
         }
     }
-    printf("There are no lists by that name.");
+    printf("There are no lists by that name.\n");
+    [self commandTree:[self parse]];
     return nil;
 }
 
@@ -204,23 +205,41 @@
 }
 /************************************************************************************/
 
--(void)newList:(NSString *)listName {
+-(void)newList:(NSString *)newListName {
+    List *list = [[List alloc] init];
+    
+    [list setName:newListName];
+    [self addList: list];
     printf("\n\n  A NEW LIST HAS BEEN CREATED:\n");
-    printf("\n      %s\n\n", [listName UTF8String]);
+    printf("\n      %s\n\n", [newListName UTF8String]);
+    
     [self commandTree:[self parse]];
 }
 
 -(void)newItem:(NSString *)listName {
+    [self getListByName:listName];
+    ListItem *newItem = [[ListItem alloc]init];
+    
     printf("\n\n  CREATING NEW ITEM IN LIST %s\n", [listName UTF8String]);
     printf("\n    Input to do item description: \n");
     NSString *description = [self parse];
+    [newItem setItemDescription:description];
     printf("\n    Input item priority from 1 (most pressing) to 4 (least pressing)\n");
-    NSString *priority = [self parse];
+    //    NSString *priority = [self parse];
+    int priority;
+    scanf("%d%*c", &priority);
+    fpurge(stdin);
+    [newItem setPriority:priority];
+    [[[self getListByName:listName] listArray] addObject:newItem];
+    
+    
     printf("\n    to do item created successfully\n\n");
     [self commandTree:[self parse]];
 }
 
 -(void)deleteList:(NSString *)listName {
+    [self getListByName:listName];
+    
     
     NSString *confirm;
     
@@ -230,6 +249,7 @@
         printf("\n    RE-ENTER THE LIST NAME TO CONFIRM or type 'cancel' to abort\n");
         confirm = [self parse];
         if ([confirm isEqualToString:listName]) {
+            [self removeList:listName];
             printf("\n    LIST %s HAS BEEN DELETED.\n", [listName UTF8String]);
             break;
         } else if ([confirm isEqualToString:@"cancel"]) {
@@ -245,8 +265,11 @@
 }
 
 -(void)renameList:(NSString *)listName {
+    
+    [self getListByName:listName];
     printf("\n\n   PLEASE ENTER NEW NAME FOR LIST %s\n", [listName UTF8String]);
     NSString *newName = [self parse];
+    [[self getListByName:listName] setName:newName];
     printf("\n    List %s has been renamed %s\n", [listName UTF8String],
            [newName UTF8String]);
     [self commandTree:[self parse]];
@@ -273,8 +296,19 @@
     for (int i = 0; i < [array count]; i++) {
         printf("\n        %d) %s\n", i, [[array[i] itemDescription] UTF8String]);
     }
+    [self commandTree:[self parse]];
 }
-
+-(void)deleteItems:(NSString *)listName {
+    [self displayList:listName];
+    while (true) {
+        printf("Please select an item to be deleted:\n");
+        int input;
+        scanf("%d%*c", &input);
+        fpurge(stdin);
+        
+        
+    }
+}
 -(NSString *)snip:(NSString *)toDelete fromCommand:(NSString *)command {
     command = [command stringByReplacingOccurrencesOfString:toDelete
                                                  withString:@""];
@@ -297,6 +331,8 @@
         [self newItem:[self snip:@"new item in " fromCommand:command]];
     } else if ([command containsString:@"display items in "]) {
         [self displayItems:[self snip:@"display items in " fromCommand:command]];
+    } else if ([command containsString:@"delete items in "]) {
+        [self deleteItems:[self snip:@"delete items in " fromCommand:command]];
     } else if ([command isEqualToString:@"exit"]) {
         exit(0);
     } else {
@@ -369,11 +405,11 @@ int main(int argc, const char * argv[]) {
         ListItem *item3 = [[ListItem alloc] init];
         [item3 setItemDescription:@"call Robin"];
         ListItem *item4 = [[ListItem alloc] init];
-        [item1 setItemDescription:@"polish bat-mobile"];
+        [item4 setItemDescription:@"polish bat-mobile"];
         ListItem *item5 = [[ListItem alloc] init];
-        [item2 setItemDescription:@"grab a beer with Joker"];
+        [item5 setItemDescription:@"grab a beer with Joker"];
         ListItem *item6 = [[ListItem alloc] init];
-        [item3 setItemDescription:@"look mysterious"];
+        [item6 setItemDescription:@"look mysterious"];
         
         List *list = [[List alloc] init];
         [list addListItem:item1];
