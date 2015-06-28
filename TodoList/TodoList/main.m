@@ -239,33 +239,81 @@
     [self addList: list];
     
 }
-
--(void)run {
-    BOOL programIsRunning = YES;
-    while (programIsRunning) {
-        printf("Welcome to the Elbo-Yucatan To-Do List Manager. Please select an option. \n 0) Exit program \n 1) Show my active to-do lists \n 2) Create a new to-do list \n 3) Edit a to-do list");
-        int input;
-        scanf("\n%d%*c", &input);
-        switch (input) {
-            case 0:
-                programIsRunning = NO;
-                break;
-            case 1:
-                [self showLists];
-                break;
-            case 2:
-                [self createList];
-                break;
-            case 3:
-                //edit to-do list
-                break;
-            default:
-                printf("You have selected an invalid option.");
-                break;
-        }
+-(void)newItem:(NSString *)listName {
+    printf("\n\n  CREATING NEW ITEM IN LIST %s\n", [listName UTF8String]);
+    printf("\n    Input to do item description: \n");
+    NSString *description = [self parse];
+    printf("\n    Input item priority from 1 (most pressing) to 4 (least pressing)\n");
+    NSString *priority = [self parse];
+    printf("\n    to do item created successfully\n\n");
+    [self commandTree:[self parse]];
+}
+-(NSString *)snip:(NSString *)toDelete fromCommand:(NSString *)command {
+    command = [command stringByReplacingOccurrencesOfString:toDelete
+                                                 withString:@""];
+    
+    return command;
+}
+-(void)newList:(NSString *)listName {
+    printf("\n\n  A NEW LIST HAS BEEN CREATED:\n");
+    printf("\n      %s\n\n", [listName UTF8String]);
+    [self commandTree:[self parse]];
+}
+-(void)commandTree:(NSString *)command {
+    if ([command isEqualToString:@"help"]) {
+        [self help];
+    } else if ([command containsString:@"new list "]) {
+        [self newList:[self snip:@"new list " fromCommand:command]];
+    } else if ([command containsString:@"new item in "]) {
+        [self newItem:[self snip:@"new item in " fromCommand:command]];
+    } else if ([command isEqualToString:@"exit"]) {
+        exit(0);
+    } else {
+        printf("\n  NOT A RECOGNIZED COMMAND\n");
+        printf("    Type 'help' for available commands");
+        [self commandTree:[self parse]];
     }
 }
-
+-(NSString *)parse {
+    
+    printf("\n    ");
+    
+    /* Allocate memory and check if okay. */
+    char *commandC = malloc (256);
+    if (commandC == NULL) {
+        printf ("No memory\n");
+    }
+    
+    // fgets is a function analogous to scanf but with better protection against
+    // buffer overflow
+    fgets (commandC, 256, stdin);
+    
+    /* Remove trailing newline, if there. */
+    if ((strlen(commandC) > 0) && (commandC[strlen (commandC) - 1] == '\n')) {
+        commandC[strlen(commandC) - 1] = '\0';
+    }
+    
+    // change C string to NSString
+    NSString *command = [NSString stringWithCString:commandC
+                                           encoding:NSUTF8StringEncoding];
+    
+    return command;
+}
+-(void)help {
+    printf("\n\n  AVAILABLE COMMANDS:\n");
+    printf("\n      new list <list name>\n");
+    printf("\n      new item in <list name>\n");
+    printf("\n      delete list <list name / all>\n");
+    printf("\n      edit list <list name>\n");
+    printf("\n      display list <list name / all>\n\n");
+    printf("\n      exit \n\n");
+    [self commandTree:[self parse]];
+}
+-(void)run {
+    printf("\n  Welcome to the Elbo-Yucatan To-Do List Management System. \n");
+    printf("\n    Type a command (or type 'help' for instructions)\n\n");
+    [self commandTree:[self parse]];
+}
 @end
 //************************** end ListManager class ***************************//
 
