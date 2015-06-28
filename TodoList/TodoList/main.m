@@ -192,7 +192,7 @@
     scanf("%255s[^\n]%*c", nameC);
     fpurge(stdin);
     NSString *name = [NSString stringWithCString:nameC
-                                         encoding:NSUTF8StringEncoding];
+                                        encoding:NSUTF8StringEncoding];
     
     [list setName:name];
     [self addList: list];
