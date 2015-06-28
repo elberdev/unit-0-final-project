@@ -138,47 +138,15 @@
 //*************************** ListManager class *******************************//
 @interface ListManager : NSObject
 
--(void)editList;
 -(void)run;
 -(void)showLists;
 -(void)addList:(List *)list;
--(List*)getListByName:(NSString*)listname;
 -(void)removeList:(NSString *)name;
 
 @end
 
 @implementation ListManager {
     NSMutableArray *_listDatabase;
-}
-
--(void)editList {
-    printf("Name of list to edit:");
-    char nameC[256];
-    scanf("%255s[^\n]%*c", nameC);
-    fpurge(stdin);
-    NSString *name = [NSString stringWithCString:nameC
-                                        encoding:NSUTF8StringEncoding];
-    int input;
-    List *tempList = [[List alloc]init];
-
-    printf("What would you like to do? \n 1) Edit list name \n 2) Delete list \n 3) Add an item to list \n 4) Delete an item from list");
-    scanf("%d", &input);
-    switch (input) {
-            
-        case 1:
-             tempList = [self getListByName:name];
-            if (tempList != nil) {
-                [tempList setName:@"hello"];
-            }
-            break;
-            
-        default:
-            printf("placeholder");
-            
-            
-            
-    }
-    
 }
 
 -(void)addList:(List *)list {
@@ -208,15 +176,6 @@
     }
     
 }
--(List*)getListByName:(NSString*)listname {
-    for (int i = 0; i < [_listDatabase count]; i++) {
-        if ([listname isEqualToString:[_listDatabase[i] name]]) {
-            return _listDatabase[i];
-        }
-    }
-    printf("There are no lists by that name.");
-    return nil;
-}
 
 -(void)showLists {
     for (int i = 0; i < [_listDatabase count]; i++) {
@@ -233,7 +192,7 @@
     scanf("%255s[^\n]%*c", nameC);
     fpurge(stdin);
     NSString *name = [NSString stringWithCString:nameC
-                                        encoding:NSUTF8StringEncoding];
+                                         encoding:NSUTF8StringEncoding];
     
     [list setName:name];
     [self addList: list];
