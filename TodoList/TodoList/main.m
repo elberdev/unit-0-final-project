@@ -81,6 +81,13 @@
     NSMutableArray *_listArray;
 }
 
+-(id)init {
+    if (self = [super init]) {
+        _listArray = [[NSMutableArray alloc] init];
+    }
+    return self;
+}
+
 -(void)setName:(NSString*)name {
     _name = name;
 }
@@ -134,11 +141,7 @@
 //*************************** ListManager class *******************************//
 @interface ListManager : NSObject
 
-
 -(void)run;
--(void)addList:(List *)list;
--(List*)getListByName:(NSString*)listname;
--(void)removeList:(NSString *)name;
 
 @end
 
@@ -298,13 +301,15 @@
 
 -(void)displayItems:(NSString *)listName withPrompt:(BOOL)prompt{
     if (prompt == YES) {
-        printf("\n\n  DISPLAYING ITEMS IN LIST %s\n", [listName UTF8String]);
+        printf("\n\n  DISPLAYING ITEMS IN LIST %s\n\n", [listName UTF8String]);
     }
     
     List *list = [self getListByName:listName];
     NSMutableArray *array = [list listArray];
+    printf("\n       |     %-35s priority  completed\n",
+           [[NSString stringWithFormat:@"description"] UTF8String]);
     for (int i = 0; i < [array count]; i++) {
-        printf("\n        %d) %-40s %d %s\n", i,
+        printf("       |\n       |  %d) %-35s      %d         %s    \n", i,
                [[array[i] itemDescription] UTF8String],
                (int)[array[i] getPriority],
                [[array[i] doneStatus] ? @"Y" : @"N" UTF8String]);
