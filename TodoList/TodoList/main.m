@@ -312,13 +312,15 @@
 -(void)deleteItems:(NSString *)listName {
     [self getListByName:listName];
     while (true) {
+        printf("\n\n  DELETING ITEMS IN LIST %s\n", [listName UTF8String]);
         [self displayItems:listName withPrompt:NO];
         printf("  Please select an item to be deleted:\n\n    ");
         int input;
         scanf("%d%*c", &input);
         fpurge(stdin);
         [[self getListByName:listName] removeListItem:input];
-        printf("\n  Do you want to continue item deletion? y/n\n");
+        printf("\n  Item has been deleted.\n");
+        printf("\n  Do you want to delete more items? y/n\n");
         NSString *deletion = [self parse];
         if ([deletion isEqualToString:@"y"]) {
             continue;
