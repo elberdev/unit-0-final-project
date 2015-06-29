@@ -86,6 +86,9 @@
 }
 
 -(NSString*)name {
+    if (_name == nil) {
+        _name = [[NSString alloc] init];
+    }
     return _name;
 }
 
@@ -143,18 +146,25 @@
     NSMutableArray *_listDatabase;
 }
 
--(void)addList:(List *)list {
-    if (_listDatabase == nil) {
+-(id)init {
+    if (self = [super init]) {
         _listDatabase = [[NSMutableArray alloc] init];
     }
+    return self;
+}
+
+-(void)addList:(List *)list {
+//    if (_listDatabase == nil) {
+//        _listDatabase = [[NSMutableArray alloc] init];
+//    }
     
     [_listDatabase addObject:list];
 }
 
 -(void)removeList:(NSString *)name {
-    if (_listDatabase == nil) {
-        _listDatabase = [[NSMutableArray alloc] init];
-    }
+//    if (_listDatabase == nil) {
+//        _listDatabase = [[NSMutableArray alloc] init];
+//    }
     
     BOOL found = NO;
     
@@ -172,12 +182,16 @@
 }
 
 -(List*)getListByName:(NSString*)listname {
+//    if (_listDatabase == nil) {
+//        _listDatabase = [[NSMutableArray alloc] init];
+//    }
+    
     for (int i = 0; i < [_listDatabase count]; i++) {
         if ([listname isEqualToString:[_listDatabase[i] name]]) {
             return _listDatabase[i];
         }
     }
-    printf("There are no lists by that name.\n");
+    printf("\n  There are no lists by that name.\n\n");
     [self commandTree:[self parse]];
     return nil;
 }
@@ -196,7 +210,6 @@
     [self addList: list];
     
 }
-/************************************************************************************/
 
 -(void)newList:(NSString *)newListName {
     List *list = [[List alloc] init];
@@ -211,7 +224,6 @@
 
 -(void)deleteList:(NSString *)listName {
     [self getListByName:listName];
-    
     
     NSString *confirm;
     
@@ -231,7 +243,8 @@
             printf("\n    list name mismatch.\n");
         }
     }
-
+    printf("\n");
+    
     [self commandTree:[self parse]];
     
 }
@@ -239,10 +252,10 @@
 -(void)renameList:(NSString *)listName {
     
     [self getListByName:listName];
-    printf("\n\n   PLEASE ENTER NEW NAME FOR LIST %s\n", [listName UTF8String]);
+    printf("\n\n  PLEASE ENTER NEW NAME FOR LIST %s\n", [listName UTF8String]);
     NSString *newName = [self parse];
     [[self getListByName:listName] setName:newName];
-    printf("\n    List %s has been renamed %s\n", [listName UTF8String],
+    printf("\n    List %s has been renamed %s\n\n", [listName UTF8String],
            [newName UTF8String]);
     [self commandTree:[self parse]];
 }
@@ -258,7 +271,8 @@
     } else {
         printf("\n\n  DISPLAYING LIST %s\n", [listName UTF8String]);
     }
-
+    printf("\n");
+    
     [self commandTree:[self parse]];
 }
 
@@ -270,9 +284,9 @@
     printf("\n    Input to do item description: \n");
     NSString *description = [self parse];
     [newItem setItemDescription:description];
-    printf("\n    Input item priority from 1 (most pressing) to 4 (least pressing)\n");
+    printf("\n    Input item priority from 1 (most pressing) to 4 (least pressing)\n\n    ");
     int priority;
-    scanf("    %d%*c", &priority);
+    scanf("%d%*c", &priority);
     fpurge(stdin);
     [newItem setPriority:priority];
     [[[self getListByName:listName] listArray] addObject:newItem];
@@ -368,7 +382,7 @@
         exit(0);
     } else {
         printf("\n  NOT A RECOGNIZED COMMAND\n");
-        printf("\n    Type 'help' for available commands\n");
+        printf("\n    Type 'help' for available commands\n\n");
         [self commandTree:[self parse]];
     }
 }
@@ -408,10 +422,10 @@
     printf("\n      new item in <list name>\n");
     printf("\n      display items in <list name>\n");
     printf("\n      delete items in <list name>\n");
-    printf("\n      display all items urgent first");
-    printf("\n      display all items urgent last");
-    printf("\n      display all items closest date first");
-    printf("\n      display all items closest date last");
+    printf("\n      display all items high priority first\n");
+    printf("\n      display all items low priority first\n");
+    printf("\n      display all items closest due date first\n");
+    printf("\n      display all items farthest due date first\n");
     printf("\n      exit \n\n");
     [self commandTree:[self parse]];
 }
