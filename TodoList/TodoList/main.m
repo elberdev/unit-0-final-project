@@ -111,7 +111,7 @@
         [[self.listArray objectAtIndex:index] setItemDescription:string];
 
     } else {
-        NSLog(@"The list item you input does not exist");
+        NSLog(@"\n  The list item you input does not exist");
     }
 }
 
@@ -154,17 +154,17 @@
 }
 
 -(void)addList:(List *)list {
-//    if (_listDatabase == nil) {
-//        _listDatabase = [[NSMutableArray alloc] init];
-//    }
+    if (_listDatabase == nil) {
+        _listDatabase = [[NSMutableArray alloc] init];
+    }
     
     [_listDatabase addObject:list];
 }
 
 -(void)removeList:(NSString *)name {
-//    if (_listDatabase == nil) {
-//        _listDatabase = [[NSMutableArray alloc] init];
-//    }
+    if (_listDatabase == nil) {
+        _listDatabase = [[NSMutableArray alloc] init];
+    }
     
     BOOL found = NO;
     
@@ -182,9 +182,9 @@
 }
 
 -(List*)getListByName:(NSString*)listname {
-//    if (_listDatabase == nil) {
-//        _listDatabase = [[NSMutableArray alloc] init];
-//    }
+    if (_listDatabase == nil) {
+        _listDatabase = [[NSMutableArray alloc] init];
+    }
     
     for (int i = 0; i < [_listDatabase count]; i++) {
         if ([listname isEqualToString:[_listDatabase[i] name]]) {
@@ -270,6 +270,7 @@
         }
     } else {
         printf("\n\n  DISPLAYING LIST %s\n", [listName UTF8String]);
+        [self displayItems:listName withPrompt:NO];
     }
     printf("\n");
     
@@ -312,12 +313,12 @@
     [self getListByName:listName];
     while (true) {
         [self displayItems:listName withPrompt:NO];
-        printf("Please select an item to be deleted:\n");
+        printf("  Please select an item to be deleted:\n\n    ");
         int input;
         scanf("%d%*c", &input);
         fpurge(stdin);
         [[self getListByName:listName] removeListItem:input];
-        printf("Do you want to continue item deletion? y/n");
+        printf("\n  Do you want to continue item deletion? y/n\n");
         NSString *deletion = [self parse];
         if ([deletion isEqualToString:@"y"]) {
             continue;
@@ -372,8 +373,7 @@
     } else if ([command containsString:@"new item in "]) {
         [self newItem:[self snip:@"new item in " fromCommand:command]];
     } else if ([command containsString:@"display items in "]) {
-        [self displayItems:[self snip:@"display items in " fromCommand:command]
-                withPrompt:YES];
+        [self displayList:[self snip:@"display items in " fromCommand:command]];
     } else if ([command containsString:@"delete items in "]) {
         [self deleteItems:[self snip:@"delete items in " fromCommand:command]];
     } else if ([command containsString:@"display all items "]) {
