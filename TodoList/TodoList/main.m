@@ -306,19 +306,47 @@
     
     List *list = [self getListByName:listName];
     NSMutableArray *array = [list listArray];
-    printf("\n       |     %-35s priority  completed\n",
-           [[NSString stringWithFormat:@"description"] UTF8String]);
-    for (int i = 0; i < [array count]; i++) {
-        printf("       |\n       |  %d) %-35s      %d         %s    \n", i,
-               [[array[i] itemDescription] UTF8String],
-               (int)[array[i] getPriority],
-               [[array[i] doneStatus] ? @"Y" : @"N" UTF8String]);
-    }
-    printf("\n");
+    
+    [self formatItems:array];
+    
     if (prompt == YES) {
        [self commandTree:[self parse]];
     }
     
+}
+
+-(void)formatItems:(NSMutableArray *)array {
+    
+    // figure out if i have to add any padding before any of the numbers by
+    // seeing how long the array is
+    int biggestNumPadding = 0;
+    NSString *arrayCount = [NSString stringWithFormat:@"%lu", [array count]];
+    biggestNumPadding = (int) [arrayCount length];
+    NSString* num = [[NSString alloc] init];
+    
+    // figure out which item description is the longest so you can use its
+    // length as the standard for formatting
+    int longestLength = 0;
+    for (int i = 0; i < [array count]; i++) {
+        if ([[array[i] itemDescription] length] > longestLength) {
+            longestLength = (int) [[array[i] itemDescription] length];
+        }
+    }
+    
+    // crazy c formatting I have to use to make everything pretty
+    printf("\n     |  %*s  %-*s  priority  completed\n", biggestNumPadding,
+           [[NSString stringWithFormat:@" "] UTF8String], longestLength,
+           [[NSString stringWithFormat:@"description"] UTF8String]);
+    
+    for (int i = 0; i < [array count]; i++) {
+        printf("     |\n     |  %*s) %-*s      %d         %s    \n",
+               biggestNumPadding,
+               [(num = [NSString stringWithFormat:@"%d", i]) UTF8String],
+               longestLength, [[array[i] itemDescription] UTF8String],
+               (int)[array[i] getPriority],
+               [[array[i] doneStatus] ? @"Y" : @"N" UTF8String]);
+    }
+    printf("\n");
 }
 
 -(void)deleteItems:(NSString *)listName {
@@ -345,25 +373,29 @@
         
         
     }
-               [self commandTree:[self parse]];
+    [self commandTree:[self parse]];
 }
 
 -(void)displayAllItems:(NSString *)order {
     
     NSMutableArray *combinedList = [[NSMutableArray alloc] init];
     for (int i = 0; i < [_listDatabase count]; i++) {
-        for (int j = 0; j < [_listDatabase[i] count]; j++) {
-            [combinedList addObject:[_listDatabase[i] objectAtIndex:j]];
+        for (int j = 0; j < [[_listDatabase[i] listArray] count]; j++) {
+            [combinedList addObject:[[_listDatabase[i] listArray] objectAtIndex:j]];
         }
     }
     
-    if([order isEqualTo:@"urgent first"]) {
-        for (int i = 1; i <= 4; i++) {
-            for (int j = 0; j < [combinedList count]; j++) {
-                
-            }
-        }
-    }
+    [self formatItems:combinedList];
+    
+//    if([order isEqualTo:@"urgent first"]) {
+//        for (int i = 1; i <= 4; i++) {
+//            for (int j = 0; j < [combinedList count]; j++) {
+//                
+//            }
+//        }
+//    }
+    
+    [self commandTree:[self parse]];
     
 }
 
@@ -438,10 +470,14 @@
     printf("\n      new item in <list name>\n");
     printf("\n      display items in <list name>\n");
     printf("\n      delete items in <list name>\n");
-    printf("\n      display all items high priority first\n");
-    printf("\n      display all items low priority first\n");
-    printf("\n      display all items closest due date first\n");
-    printf("\n      display all items farthest due date first\n");
+    printf("\n      display all items <sort selector> first\n");
+    printf("\n            sort selectors:\n\n");
+    printf("               high priority\n");
+    printf("               low priority\n");
+    printf("               closest due date\n");
+    printf("               farthest due date\n");
+    printf("               completed\n");
+    printf("               not completed\n");
     printf("\n      exit \n\n");
     [self commandTree:[self parse]];
 }
@@ -466,40 +502,65 @@ int main(int argc, const char * argv[]) {
         
         ListItem *item1 = [[ListItem alloc] init];
         [item1 setItemDescription:@"do laundry"];
+        [item1 setPriority:3];
         ListItem *item2 = [[ListItem alloc] init];
         [item2 setItemDescription:@"kill bad guys"];
+        [item2 setPriority:2];
         ListItem *item3 = [[ListItem alloc] init];
         [item3 setItemDescription:@"call Robin"];
+        [item3 setPriority:4];
         ListItem *item4 = [[ListItem alloc] init];
         [item4 setItemDescription:@"polish bat-mobile"];
         ListItem *item5 = [[ListItem alloc] init];
         [item5 setItemDescription:@"grab a beer with Joker"];
+        [item5 setPriority:3];
         ListItem *item6 = [[ListItem alloc] init];
         [item6 setItemDescription:@"look mysterious"];
+        ListItem *item7 = [[ListItem alloc] init];
+        [item7 setItemDescription:@"get haircut"];
+        [item7 setPriority:1];
+        ListItem *item8 = [[ListItem alloc] init];
+        [item8 setItemDescription:@"buy flowers for catwoman"];
+        [item8 setPriority:3];
+        ListItem *item9 = [[ListItem alloc] init];
+        [item9 setItemDescription:@"fire alfred"];
+        [item9 setPriority:2];
+        ListItem *item10 = [[ListItem alloc] init];
+        [item10 setItemDescription:@"march at pride"];
+        [item10 setPriority:4];
+        ListItem *item11 = [[ListItem alloc] init];
+        [item11 setItemDescription:@"get wonder woman to teach me how to use a lasso"];
+        [item11 setPriority:2];
         
         List *list = [[List alloc] init];
         [list addListItem:item1];
         [list addListItem:item2];
         [list addListItem:item3];
+        [list addListItem:item4];
+        [list addListItem:item5];
+        [list addListItem:item6];
         [list setName:@"urgent"];
         
         List *list2 = [[List alloc] init];
-        [list2 addListItem:item4];
-        [list2 addListItem:item5];
-        [list2 addListItem:item6];
-        [list2 setName:@"monty python"];
+        [list2 addListItem:item7];
+        [list2 addListItem:item8];
+        [list2 addListItem:item9];
+        [list2 addListItem:item9];
+        [list2 addListItem:item10];
+        [list2 addListItem:item11];
+        [list2 setName:@"more urgentest"];
         
 //        for(int i = 0; i < [arrayList count]; i++) {
 //            NSLog(@"%@", [arrayList[i] itemDescription]);
 //        }
         
-        [list removeListItem:2];
+//        [list removeListItem:2];
         
 //        for(int i = 0; i < [arrayList count]; i++) {
 //            NSLog(@"%@", [arrayList[i] itemDescription]);
 //        }
         
-        [list editListItem:0 withString:@"elect Bernie Sanders president"];
+        [list editListItem:0 withString:@"hit Bernie Sanders with a batarang"];
         
 //        for(int i = 0; i < [arrayList count]; i++) {
 //            NSLog(@"%@", [arrayList[i] itemDescription]);
