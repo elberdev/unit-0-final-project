@@ -15,7 +15,7 @@
 -(void)setItemDescription:(NSString *)itemDescription;
 -(NSString *)itemDescription;
 -(void)setPriority:(int)priority;
--(int)priority;
+-(int)getPriority;
 -(void)setDoneStatus:(BOOL)doneStatus;
 -(BOOL)doneStatus;
 
@@ -48,7 +48,7 @@
     _priority = priority;
 }
 
--(int)priority {
+-(int)getPriority {
     return _priority;
 }
 
@@ -304,7 +304,10 @@
     List *list = [self getListByName:listName];
     NSMutableArray *array = [list listArray];
     for (int i = 0; i < [array count]; i++) {
-        printf("\n        %d) %s\n", i, [[array[i] itemDescription] UTF8String]);
+        printf("\n        %d) %-40s %d %s\n", i,
+               [[array[i] itemDescription] UTF8String],
+               (int)[array[i] getPriority],
+               [[array[i] doneStatus] ? @"Y" : @"N" UTF8String]);
     }
     printf("\n");
     if (prompt == YES) {
