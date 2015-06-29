@@ -2,8 +2,8 @@
 //  main.m
 //  TodoList
 //
-//  Created by Michael Kavouras on 6/25/15.
-//  Copyright (c) 2015 Mike Kavouras. All rights reserved.
+//  Created by Elber Carneiro and Jackie Meggesto on 6/25/15.
+//  Copyright (c) 2015 Jackie Meggesto and Elber Carneiro. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -265,7 +265,9 @@
 
 -(void)displayList:(NSString *)listName {
     
-    if ([listName isEqualToString:@"all"]) {
+    if ([_listDatabase count] == 0) {
+            printf("\n\n  NO TO-DO LISTS TO DISPLAY\n");
+    } else if ([listName isEqualToString:@"all"]) {
         printf("\n\n  DISPLAYING ALL TO-DO LISTS\n");
         for (int i = 0; i < [_listDatabase count]; i++) {
             printf("\n    %s: %lu items\n", [[_listDatabase[i] name] UTF8String],
@@ -317,6 +319,11 @@
 
 -(void)formatItems:(NSMutableArray *)array {
     
+    if ([array count] == 0) {
+        printf("\n      No items to display\n\n");
+        return;
+    }
+    
     // figure out if i have to add any padding before any of the numbers by
     // seeing how long the array is
     int biggestNumPadding = 0;
@@ -326,7 +333,8 @@
     
     // figure out which item description is the longest so you can use its
     // length as the standard for formatting
-    int longestLength = 0;
+    NSString *description = [NSString stringWithFormat:@"description"];
+    int longestLength = (int) [description length];
     for (int i = 0; i < [array count]; i++) {
         if ([[array[i] itemDescription] length] > longestLength) {
             longestLength = (int) [[array[i] itemDescription] length];
@@ -336,7 +344,7 @@
     // crazy c formatting I have to use to make everything pretty
     printf("\n     |  %*s  %-*s  priority  completed\n", biggestNumPadding,
            [[NSString stringWithFormat:@" "] UTF8String], longestLength,
-           [[NSString stringWithFormat:@"description"] UTF8String]);
+           [description UTF8String]);
     
     for (int i = 0; i < [array count]; i++) {
         printf("     |\n     |  %*s) %-*s      %d         %s    \n",
@@ -550,26 +558,12 @@ int main(int argc, const char * argv[]) {
         [list2 addListItem:item11];
         [list2 setName:@"more urgentest"];
         
-//        for(int i = 0; i < [arrayList count]; i++) {
-//            NSLog(@"%@", [arrayList[i] itemDescription]);
-//        }
-        
-//        [list removeListItem:2];
-        
-//        for(int i = 0; i < [arrayList count]; i++) {
-//            NSLog(@"%@", [arrayList[i] itemDescription]);
-//        }
-        
         [list editListItem:0 withString:@"hit Bernie Sanders with a batarang"];
-        
-//        for(int i = 0; i < [arrayList count]; i++) {
-//            NSLog(@"%@", [arrayList[i] itemDescription]);
-//        }
         
         ListManager *myListManager = [[ListManager alloc]init];
         [myListManager addList:list];
         [myListManager addList:list2];
-        //[myListManager showLists];
+
         [myListManager run];
         /// yo yo yo 
 
