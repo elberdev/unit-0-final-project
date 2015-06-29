@@ -297,6 +297,10 @@
 }
 
 -(void)displayItems:(NSString *)listName withPrompt:(BOOL)prompt{
+    if (prompt == YES) {
+        printf("\n\n  DISPLAYING ITEMS IN LIST %s\n", [listName UTF8String]);
+    }
+    
     List *list = [self getListByName:listName];
     NSMutableArray *array = [list listArray];
     for (int i = 0; i < [array count]; i++) {
@@ -314,20 +318,21 @@
     while (true) {
         printf("\n\n  DELETING ITEMS IN LIST %s\n", [listName UTF8String]);
         [self displayItems:listName withPrompt:NO];
-        printf("  Please select an item to be deleted:\n\n    ");
+        printf("    Please select an item to be deleted:\n\n    ");
         int input;
         scanf("%d%*c", &input);
         fpurge(stdin);
         [[self getListByName:listName] removeListItem:input];
-        printf("\n  Item has been deleted.\n");
-        printf("\n  Do you want to delete more items? y/n\n");
+        printf("\n    Item has been deleted.\n");
+        printf("\n    Do you want to delete more items? y/n\n");
         NSString *deletion = [self parse];
         if ([deletion isEqualToString:@"y"]) {
+            printf("\n\n  RETURNING TO NORMAL PROMPT\n");
             continue;
         } else if ([deletion isEqualToString:@"n"]) {
             break;
         } else {
-            printf("Invalid command.");
+            printf("\n    Invalid command.\n");
         }
         
         
@@ -375,7 +380,8 @@
     } else if ([command containsString:@"new item in "]) {
         [self newItem:[self snip:@"new item in " fromCommand:command]];
     } else if ([command containsString:@"display items in "]) {
-        [self displayList:[self snip:@"display items in " fromCommand:command]];
+        [self displayItems:[self snip:@"display items in " fromCommand:command]
+                withPrompt:YES];
     } else if ([command containsString:@"delete items in "]) {
         [self deleteItems:[self snip:@"delete items in " fromCommand:command]];
     } else if ([command containsString:@"display all items "]) {
