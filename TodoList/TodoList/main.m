@@ -14,7 +14,7 @@
 
 -(void)setItemDescription:(NSString *)itemDescription;
 -(NSString *)itemDescription;
--(void)setItemPriority:(int)itemPriority;
+-(void)setItemPriority:(int)priority;
 -(int)itemPriority;
 -(void)setDoneStatus:(BOOL)doneStatus;
 -(BOOL)doneStatus;
@@ -70,7 +70,9 @@
 -(void)addListItem:(ListItem *)listItem;
 -(NSMutableArray *)listArray;
 -(void)removeListItem:(int)index;
--(void)editListItem:(int)index withString:(NSString *)string;
+-(void)editListItemDescription:(int)index withString:(NSString *)string;
+-(void)editListPriority:(int)index withPriority:(int)priority;
+-(void)editListDoneStatus:(int)index withDoneStatus:(BOOL)doneStatus;
 -(void)setName:(NSString*)name;
 -(NSString*)name;
 
@@ -112,7 +114,7 @@
     }
 }
 
--(void)editListItem:(int)index withString:(NSString *)string {
+-(void)editListItemDescription:(int)index withString:(NSString *)string {
     
     if (index < [self.listArray count]) {
         [[self.listArray objectAtIndex:index] setItemDescription:string];
@@ -121,7 +123,22 @@
         NSLog(@"\n  The list item you input does not exist");
     }
 }
-
+-(void)editListPriority:(int)index withPriority:(int)priority {
+    if (index < [self.listArray count]) {
+        [[self.listArray objectAtIndex:index] setItemPriority:priority];
+        
+    } else {
+        NSLog(@"\n  The list item you input does not exist");
+    }
+}
+-(void)editListDoneStatus:(int)index withDoneStatus:(BOOL)doneStatus {
+    if (index < [self.listArray count]) {
+        [[self.listArray objectAtIndex:index] setDoneStatus:doneStatus];
+        
+    } else {
+        NSLog(@"\n  The list item you input does not exist");
+    }
+}
 -(NSUInteger)showNumberOfItems {
     
     return [self.listArray count];
@@ -379,8 +396,22 @@
     }
     printf("\n");
 }
-
+-(void)deleteItemPrompt:(NSString*)listname {
+    
+    printf("\n    Do you want to delete more items? y/n\n");
+    NSString *prompt = [self parse];
+    if ([prompt isEqualToString:@"y"]) {
+        [self deleteItems:listname];
+    } else if ([prompt isEqualToString:@"n"]) {
+        printf("Exiting deletion");
+        [self commandTree:[self parse]];
+    } else {
+        printf("Invalid input.");
+        [self deleteItemPrompt:listname];
+    }
+}
 -(void)deleteItems:(NSString *)listName {
+    
     [self getListByName:listName];
     while (true) {
         printf("\n\n  DELETING ITEMS IN LIST %s\n", [listName UTF8String]);
@@ -391,20 +422,11 @@
         fpurge(stdin);
         [[self getListByName:listName] removeListItem:input];
         printf("\n    Item has been deleted.\n");
-        printf("\n    Do you want to delete more items? y/n\n");
-        NSString *deletion = [self parse];
-        if ([deletion isEqualToString:@"y"]) {
-            printf("\n\n  RETURNING TO NORMAL PROMPT\n");
-            continue;
-        } else if ([deletion isEqualToString:@"n"]) {
-            break;
-        } else {
-            printf("\n    Invalid command.\n");
-        }
-        
+        [self deleteItemPrompt:listName];
+
         
     }
-    [self commandTree:[self parse]];
+    
 }
 
 -(void)displayAllItems:(NSString *)order {
@@ -420,6 +442,81 @@
     
     [self commandTree:[self parse]];
     
+}
+-(void)editItemsInListSelector:(NSString*)listname {
+    int itemIndex;
+    int editOption;
+    int newPriority;
+    NSString *myInput;
+    scanf("%d%*c", &itemIndex);
+    fpurge(stdin);
+    printf("What edit would you like to perform on that item? \n 1) Reassign priority \n 2) Edit description \n 3) Change completion status \n");
+    scanf("%d%*c", &editOption);
+    fpurge(stdin);
+    if (editOption == 1) {
+        printf("please enter a value between 1 (greatest priority) and 4 (least priority) \n");
+        scanf("%d", &newPriority);
+        fpurge(stdin);
+        [[self getListByName:listname] editListPriority:itemIndex withPriority:newPriority];
+    } else if (editOption == 2) {
+        printf("Input a new description for this item: \n");
+        [[self getListByName:listname] editListItemDescription:itemIndex withString:[self parse]];
+    } else if (editOption == 3) {
+        printf("Please enter 'y' if this item is done, or 'n' if the item is not done \n");
+        myInput = [self parse];
+        if ([myInput isEqualToString:@"y"]) {
+            [[self getListByName:listname] editListDoneStatus:itemIndex withDoneStatus:YES];
+        } else if ([myInput isEqualToString:@"n"]) {
+            [[self getListByName:listname] editListDoneStatus:itemIndex withDoneStatus:NO];
+        } else {
+            printf("invalid input");
+        }
+    }
+}
+-(void)editItemPrompt:(NSString*)listname {
+    
+    printf("\n    Do you want to edit more items? y/n\n");
+    NSString *prompt = [self parse];
+    if ([prompt isEqualToString:@"y"]) {
+        [self editItemsInList:listname];
+    } else if ([prompt isEqualToString:@"n"]) {
+        printf("Exiting item editing");
+        [self commandTree:[self parse]];
+    } else {
+        printf("Invalid input.");
+        [self editItemPrompt:listname];
+    }
+}
+-(void)editItemsInList:(NSString*)listname {
+    [self getListByName:listname];
+    while (true) {
+        printf("\n\n  EDITING ITEMS IN LIST %s\n", [listname UTF8String]);
+        [self displayItems:listname withPrompt:NO];
+        printf("    Please select an item to be edited:\n\n    ");
+        [self editItemsInListSelector:listname];
+        [self editItemPrompt:listname];
+        
+//        NSString *input = [self parse];
+//        int itemInput;
+//        int itemInput2;
+//        int itemInput3;
+//        scanf("%d%*c", &itemInput);
+//        fpurge(stdin);
+//        printf("What edit would you like to perform on that item? \n 1) Reassign priority \n 2) Edit description \n 3) Change completion status");
+//        scanf("%d%*c", &itemInput2);
+//        fpurge(stdin);
+//        if (itemInput2 == 1) {
+//            [[self getListByName:listname] editListPriority:itemInput withPriority:(scanf("%d%*c", &itemInput3))];
+//        } else if (itemInput2 == 2) {
+//            [[self getListByName:listname] editListItemDescription:itemInput withString:[self parse]];
+//        } else if (itemInput2 == 3) {
+//            
+//        }
+        
+        // [self *will create new method for editItemsInListPrompt* deleteItemPrompt:listname];
+        
+        
+    }
 }
 
 -(NSString *)snip:(NSString *)toDelete fromCommand:(NSString *)command {
@@ -448,7 +545,9 @@
     } else if ([command containsString:@"delete items in "]) {
         [self deleteItems:[self snip:@"delete items in " fromCommand:command]];
     } else if ([command containsString:@"display all items "]) {
-        [self displayAllItems:[self snip:@"display all items " fromCommand:command]];
+        [self editItemsInList:[self snip:@"display all items " fromCommand:command]];
+    } else if ([command containsString:@"edit items in "]) {
+        [self editItemsInList:[self snip:@"edit items in " fromCommand:command]];
     } else if ([command isEqualToString:@"exit"]) {
         exit(0);
     } else {
@@ -493,6 +592,7 @@
     printf("\n      new item in <list name>\n");
     printf("\n      display items in <list name>\n");
     printf("\n      delete items in <list name>\n");
+    printf("\n      edit items in <list name>\n");
     printf("\n      display all items <sort selector> first\n");
     printf("\n            sort selectors:\n\n");
     printf("               high priority\n");
@@ -567,7 +667,7 @@ int main(int argc, const char * argv[]) {
         [list2 addListItem:item11];
         [list2 setName:@"more urgentest"];
         
-        [list editListItem:0 withString:@"hit Bernie Sanders with a batarang"];
+        [list editListItemDescription:0 withString:@"hit Bernie Sanders with a batarang"];
         
         ListManager *myListManager = [[ListManager alloc]init];
         [myListManager addList:list];
