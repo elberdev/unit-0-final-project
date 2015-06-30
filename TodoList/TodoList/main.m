@@ -418,14 +418,6 @@
     
     [self formatItems:combinedList];
     
-//    if([order isEqualTo:@"urgent first"]) {
-//        for (int i = 1; i <= 4; i++) {
-//            for (int j = 0; j < [combinedList count]; j++) {
-//                
-//            }
-//        }
-//    }
-    
     [self commandTree:[self parse]];
     
 }
@@ -524,12 +516,6 @@
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
-
-        // insert code here...
-//        char string[256];
-//        scanf("%255s", &string);
-//        NSString *firstName = [NSString stringWithCString:string encoding:1];
-//        NSLog(@"%@", firstName);
         
         ListItem *item1 = [[ListItem alloc] init];
         [item1 setItemDescription:@"do laundry"];
