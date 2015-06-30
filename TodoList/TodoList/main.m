@@ -317,7 +317,7 @@
     
 }
 
-//////////// call this in displayItems ////////////////////////////////////////////////
+//////////// call this in displayItems //////////////////////////////////////////////////////
 -(NSArray *)sortItems:(NSMutableArray *)array
                           by:(NSString *)descriptor
                    ascending:(BOOL)ascending {
