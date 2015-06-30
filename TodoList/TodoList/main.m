@@ -106,7 +106,7 @@
     if (index < [self.listArray count]) {
         [self.listArray removeObjectAtIndex:index];
     } else {
-        printf("The list item you input does not exist\n");
+        printf("\n  The list item you input does not exist\n");
     }
 }
 
@@ -114,7 +114,7 @@
     if (index < [self.listArray count]) {
         [[self.listArray objectAtIndex:index] setItemDescription:string];
     } else {
-        NSLog(@"\n  The list item you input does not exist");
+        printf("\n  The list item you input does not exist\n");
     }
 }
 
@@ -122,7 +122,7 @@
     if (index < [self.listArray count]) {
         [[self.listArray objectAtIndex:index] setItemPriority:priority];
     } else {
-        NSLog(@"\n  The list item you input does not exist");
+        printf("\n  The list item you input does not exist\n");
     }
 }
 
@@ -131,7 +131,7 @@
         [[self.listArray objectAtIndex:index] setDoneStatus:doneStatus];
         
     } else {
-        NSLog(@"\n  The list item you input does not exist");
+        printf("\n  The list item you input does not exist\n");
     }
 }
 
@@ -188,7 +188,6 @@
     if (found == NO) {
         printf("\nThere are no lists matching that name");
     }
-    
 }
 
 -(List*)getListByName:(NSString*)listname {
@@ -215,7 +214,6 @@
 
 -(void)deleteList:(NSString *)listName {
     [self getListByName:listName];
-    
     NSString *confirm;
     
     while (true) {
@@ -237,11 +235,9 @@
     printf("\n");
     
     [self commandTree:[self parse]];
-    
 }
 
 -(void)renameList:(NSString *)listName {
-    
     [self getListByName:listName];
     printf("\n\n  PLEASE ENTER NEW NAME FOR LIST %s\n", [listName UTF8String]);
     NSString *newName = [self parse];
@@ -301,7 +297,6 @@
 }
 
 -(void)formatItems:(NSMutableArray *)array {
-    
     if ([array count] == 0) {
         printf("\n      No items to display\n\n");
         return;
@@ -341,7 +336,6 @@
 }
 
 -(void)deleteItemPrompt:(NSString*)listname {
-    
     printf("\n    Do you want to delete more items? y/n\n");
     NSString *prompt = [self parse];
     if ([prompt isEqualToString:@"y"]) {
@@ -356,7 +350,6 @@
 }
 
 -(void)deleteItems:(NSString *)listName {
-    
     [self getListByName:listName];
     while (true) {
         printf("\n\n  DELETING ITEMS IN LIST %s\n", [listName UTF8String]);
@@ -374,7 +367,6 @@
 }
 
 -(NSArray *)sortItems:(NSMutableArray *)array {
-    
     NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] init];
     sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:_sortDescriptorKey
                                                    ascending:_ascending];
@@ -423,7 +415,6 @@
     
     [self formatItems:combinedList];
     [self commandTree:[self parse]];
-    
 }
 
 -(void)editItemsInListSelector:(NSString*)listname {
@@ -476,7 +467,6 @@
 }
 
 -(void)editItemPrompt:(NSString*)listname {
-    
     printf("\n    Do you want to edit more items? y/n\n");
     NSString *prompt = [self parse];
     if ([prompt isEqualToString:@"y"]) {
@@ -505,7 +495,6 @@
 -(NSString *)snip:(NSString *)toDelete fromCommand:(NSString *)command {
     command = [command stringByReplacingOccurrencesOfString:toDelete
                                                  withString:@""];
-    
     return command;
 }
 
@@ -538,7 +527,6 @@
 }
 
 -(NSString *)parse {
-    
     printf("\n    ");
     
     /* Allocate memory and check if okay. */
@@ -559,7 +547,6 @@
     // change C string to NSString
     NSString *command = [NSString stringWithCString:commandC
                                            encoding:NSUTF8StringEncoding];
-    
     return command;
 }
 
