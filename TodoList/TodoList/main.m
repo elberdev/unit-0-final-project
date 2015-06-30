@@ -14,8 +14,8 @@
 
 -(void)setItemDescription:(NSString *)itemDescription;
 -(NSString *)itemDescription;
--(void)setPriority:(int)priority;
--(int)getPriority;
+-(void)setItemPriority:(int)itemPriority;
+-(int)itemPriority;
 -(void)setDoneStatus:(BOOL)doneStatus;
 -(BOOL)doneStatus;
 
@@ -23,14 +23,14 @@
 
 @implementation ListItem {
     NSString *_itemDescription;
-    int _priority;
+    int _itemPriority;
     BOOL _doneStatus;
     NSDate *_dueDate;
 }
 
 -(id)init {
     if(self = [super init]) {
-        _priority = 1;
+        _itemPriority = 1;
         _doneStatus = NO;
     }
     return self;
@@ -44,12 +44,12 @@
     return _itemDescription;
 }
 
--(void)setPriority:(int)priority {
-    _priority = priority;
+-(void)setItemPriority:(int)priority {
+    _itemPriority = priority;
 }
 
--(int)getPriority {
-    return _priority;
+-(int)itemPriority {
+    return _itemPriority;
 }
 
 -(void)setDoneStatus:(BOOL)doneStatus {
@@ -294,7 +294,7 @@
     int priority;
     scanf("%d%*c", &priority);
     fpurge(stdin);
-    [newItem setPriority:priority];
+    [newItem setItemPriority:priority];
     [[[self getListByName:listName] listArray] addObject:newItem];
     
     printf("\n    to do item created successfully\n\n");
@@ -316,6 +316,29 @@
     }
     
 }
+
+//////////// call this in displayItems ////////////////////////////////////////////////
+-(NSArray *)sortItems:(NSMutableArray *)array
+                          by:(NSString *)descriptor
+                   ascending:(BOOL)ascending {
+    
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] init];
+    
+    if ([descriptor isEqualToString:@"itemPriority"]) {
+        sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:descriptor
+                                                       ascending:ascending];
+    } else {
+        sortDescriptor = [NSSortDescriptor
+                          sortDescriptorWithKey:descriptor
+                                      ascending:ascending
+                                       selector:@selector(localizedStandardCompare:)];
+    }
+
+    return [array sortedArrayUsingDescriptors:@[sortDescriptor]];
+ 
+}
+/////////////////////////////////////////////////////////////////////////////////////////////
+
 
 -(void)formatItems:(NSMutableArray *)array {
     
@@ -351,7 +374,7 @@
                biggestNumPadding,
                [(num = [NSString stringWithFormat:@"%d", i]) UTF8String],
                longestLength, [[array[i] itemDescription] UTF8String],
-               (int)[array[i] getPriority],
+               (int)[array[i] itemPriority],
                [[array[i] doneStatus] ? @"Y" : @"N" UTF8String]);
     }
     printf("\n");
@@ -510,35 +533,35 @@ int main(int argc, const char * argv[]) {
         
         ListItem *item1 = [[ListItem alloc] init];
         [item1 setItemDescription:@"do laundry"];
-        [item1 setPriority:3];
+        [item1 setItemPriority:3];
         ListItem *item2 = [[ListItem alloc] init];
         [item2 setItemDescription:@"kill bad guys"];
-        [item2 setPriority:2];
+        [item2 setItemPriority:2];
         ListItem *item3 = [[ListItem alloc] init];
         [item3 setItemDescription:@"call Robin"];
-        [item3 setPriority:4];
+        [item3 setItemPriority:4];
         ListItem *item4 = [[ListItem alloc] init];
         [item4 setItemDescription:@"polish bat-mobile"];
         ListItem *item5 = [[ListItem alloc] init];
         [item5 setItemDescription:@"grab a beer with Joker"];
-        [item5 setPriority:3];
+        [item5 setItemPriority:3];
         ListItem *item6 = [[ListItem alloc] init];
         [item6 setItemDescription:@"look mysterious"];
         ListItem *item7 = [[ListItem alloc] init];
         [item7 setItemDescription:@"get haircut"];
-        [item7 setPriority:1];
+        [item7 setItemPriority:1];
         ListItem *item8 = [[ListItem alloc] init];
         [item8 setItemDescription:@"buy flowers for catwoman"];
-        [item8 setPriority:3];
+        [item8 setItemPriority:3];
         ListItem *item9 = [[ListItem alloc] init];
         [item9 setItemDescription:@"fire alfred"];
-        [item9 setPriority:2];
+        [item9 setItemPriority:2];
         ListItem *item10 = [[ListItem alloc] init];
         [item10 setItemDescription:@"march at pride"];
-        [item10 setPriority:4];
+        [item10 setItemPriority:4];
         ListItem *item11 = [[ListItem alloc] init];
         [item11 setItemDescription:@"get wonder woman to teach me how to use a lasso"];
-        [item11 setPriority:2];
+        [item11 setItemPriority:2];
         
         List *list = [[List alloc] init];
         [list addListItem:item1];
