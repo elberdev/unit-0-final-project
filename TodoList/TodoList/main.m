@@ -159,11 +159,14 @@
 
 @implementation ListManager {
     NSMutableArray *_listDatabase;
+    BOOL _ascending;
+    NSString *_sortDescriptorKey;
 }
 
 -(id)init {
     if (self = [super init]) {
         _listDatabase = [[NSMutableArray alloc] init];
+        _sortDescriptorKey = [[NSString alloc] init];
     }
     return self;
 }
@@ -260,7 +263,7 @@
         }
     } else {
         printf("\n\n  DISPLAYING LIST %s\n", [listName UTF8String]);
-        [self displayItems:listName withPrompt:NO];
+        [self displayItems:listName];
     }
     printf("\n");
     
@@ -290,42 +293,12 @@
     [self commandTree:[self parse]];
 }
 
--(void)displayItems:(NSString *)listName withPrompt:(BOOL)prompt{
-    if (prompt == YES) {
-        printf("\n\n  DISPLAYING ITEMS IN LIST %s\n\n", [listName UTF8String]);
-    }
-    
+-(void)displayItems:(NSString *)listName {
     List *list = [self getListByName:listName];
     NSMutableArray *array = [list listArray];
     
     [self formatItems:array];
-    
-    if (prompt == YES) {
-       [self commandTree:[self parse]];
-    }
-    
 }
-
-//////////// call this in displayItems //////////////////////////////////////////////////////
--(NSArray *)sortItems:(NSMutableArray *)array
-                          by:(NSString *)descriptor
-                   ascending:(BOOL)ascending {
-    
-    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] init];
-    
-    if ([descriptor isEqualToString:@"itemPriority"]) {
-        sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:descriptor
-                                                       ascending:ascending];
-    } else {
-        sortDescriptor = [NSSortDescriptor
-                          sortDescriptorWithKey:descriptor
-                                      ascending:ascending
-                                       selector:@selector(localizedStandardCompare:)];
-    }
-
-    return [array sortedArrayUsingDescriptors:@[sortDescriptor]];
-}
-/////////////////////////////////////////////////////////////////////////////////////////////
 
 -(void)formatItems:(NSMutableArray *)array {
     
@@ -352,12 +325,12 @@
     }
     
     // crazy c formatting I have to use to make everything pretty
-    printf("\n     |  %*s  %-*s  priority  completed\n", biggestNumPadding,
+    printf("\n     |  %*s  %-*s  priority  done\n", biggestNumPadding,
            [[NSString stringWithFormat:@" "] UTF8String], longestLength,
            [description UTF8String]);
     
     for (int i = 0; i < [array count]; i++) {
-        printf("     |\n     |  %*s) %-*s      %d         %s    \n",
+        printf("     |\n     |  %*s) %-*s      %d       %s\n",
                biggestNumPadding,
                [(num = [NSString stringWithFormat:@"%d", i]) UTF8String],
                longestLength, [[array[i] itemDescription] UTF8String],
@@ -387,7 +360,7 @@
     [self getListByName:listName];
     while (true) {
         printf("\n\n  DELETING ITEMS IN LIST %s\n", [listName UTF8String]);
-        [self displayItems:listName withPrompt:NO];
+        [self displayItems:listName];
         printf("    Please select an item to be deleted:\n\n    ");
         int input;
         scanf("%d%*c", &input);
@@ -400,13 +373,52 @@
     
 }
 
--(void)displayAllItems:(NSString *)order {
+-(NSArray *)sortItems:(NSMutableArray *)array {
+    
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] init];
+    sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:_sortDescriptorKey
+                                                   ascending:_ascending];
+    //                                              selector:@selector(localizedStandardCompare:)];
+    // Don't forget to use this last parameter ^^^^^^^^^^^^^^^^^^^^ if you want to
+    // compare strings instead of numbers
+    
+    return [array sortedArrayUsingDescriptors:@[sortDescriptor]];
+}
+
+-(void)prioritySort:(NSString *)command {
+    if ([command containsString:@" high priority first"]) {
+        _ascending = YES;
+        _sortDescriptorKey = [NSString stringWithFormat:@"itemPriority"];
+    } else if ([command containsString:@" low priority first"]) {
+        _ascending = NO;
+        _sortDescriptorKey = [NSString stringWithFormat:@"itemPriority"];
+    } else if ([command containsString:@" not done first"]) {
+        _ascending = YES;
+        _sortDescriptorKey = [NSString stringWithFormat:@"doneStatus"];
+    } else if ([command containsString:@" done first"]) {
+        _ascending = NO;
+        _sortDescriptorKey = [NSString stringWithFormat:@"doneStatus"];
+    } else {
+        return;
+    }
+}
+
+-(void)displayAllItems:(NSString *)command {
     
     NSMutableArray *combinedList = [[NSMutableArray alloc] init];
     for (int i = 0; i < [_listDatabase count]; i++) {
         for (int j = 0; j < [[_listDatabase[i] listArray] count]; j++) {
             [combinedList addObject:[[_listDatabase[i] listArray] objectAtIndex:j]];
         }
+    }
+    
+    if ([command isEqualToString:@" high priority first"] ||
+        [command isEqualToString:@" low priority first"] ||
+        [command isEqualToString:@" done first"] ||
+        [command isEqualToString:@" not done first"]) {
+        
+        [self prioritySort:command];
+        combinedList = [NSMutableArray arrayWithArray:[self sortItems:combinedList]];
     }
     
     [self formatItems:combinedList];
@@ -482,7 +494,7 @@
     [self getListByName:listname];
     while (true) {
         printf("\n\n  EDITING ITEMS IN LIST %s\n", [listname UTF8String]);
-        [self displayItems:listname withPrompt:NO];
+        [self displayItems:listname];
         printf("    Please select an item to be edited:\n\n");
         [self editItemsInListSelector:listname];
         [self editItemPrompt:listname];
@@ -510,13 +522,10 @@
         [self displayList:[self snip:@"display list " fromCommand:command]];
     } else if ([command containsString:@"new item in "]) {
         [self newItem:[self snip:@"new item in " fromCommand:command]];
-    } else if ([command containsString:@"display items in "]) {
-        [self displayItems:[self snip:@"display items in " fromCommand:command]
-                withPrompt:YES];
     } else if ([command containsString:@"delete items in "]) {
         [self deleteItems:[self snip:@"delete items in " fromCommand:command]];
-    } else if ([command containsString:@"display all items "]) {
-        [self displayAllItems:[self snip:@"display all items " fromCommand:command]];
+    } else if ([command containsString:@"display all items"]) {
+        [self displayAllItems:[self snip:@"display all items" fromCommand:command]];
     } else if ([command containsString:@"edit items in "]) {
         [self editItemsInList:[self snip:@"edit items in " fromCommand:command]];
     } else if ([command isEqualToString:@"exit"]) {
@@ -561,17 +570,17 @@
     printf("\n      rename list <list name>\n");
     printf("\n      display list <list name / all>\n");
     printf("\n      new item in <list name>\n");
-    printf("\n      display items in <list name>\n");
+//    printf("\n      display items in <list name>\n");
     printf("\n      delete items in <list name>\n");
     printf("\n      edit items in <list name>\n");
     printf("\n      display all items <sort selector> first\n");
     printf("\n            sort selectors:\n\n");
     printf("               high priority\n");
     printf("               low priority\n");
-    printf("               closest due date\n");
-    printf("               farthest due date\n");
-    printf("               completed\n");
-    printf("               not completed\n");
+//    printf("               closest due date\n");
+//    printf("               farthest due date\n");
+    printf("               done\n");
+    printf("               not done\n");
     printf("\n      exit \n\n");
     [self commandTree:[self parse]];
 }
