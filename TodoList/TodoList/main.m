@@ -429,29 +429,30 @@
     
 }
 -(void)editItemsInListSelector:(NSString*)listname {
-    int itemInput;
-    int itemInput2;
-    int itemInput3;
+    int itemIndex;
+    int editOption;
+    int newPriority;
     NSString *myInput;
-    scanf("%d%*c", &itemInput);
+    scanf("%d%*c", &itemIndex);
     fpurge(stdin);
-    printf("What edit would you like to perform on that item? \n 1) Reassign priority \n 2) Edit description \n 3) Change completion status");
-    scanf("%d%*c", &itemInput2);
+    printf("What edit would you like to perform on that item? \n 1) Reassign priority \n 2) Edit description \n 3) Change completion status \n");
+    scanf("%d%*c", &editOption);
     fpurge(stdin);
-    if (itemInput2 == 1) {
-        printf("please enter a value between 1 (greatest priority) and 4 (least priority \n");
-        [[self getListByName:listname] editListPriority:itemInput withPriority:(scanf("%d", &itemInput3))];
+    if (editOption == 1) {
+        printf("please enter a value between 1 (greatest priority) and 4 (least priority) \n");
+        scanf("%d", &newPriority);
         fpurge(stdin);
-    } else if (itemInput2 == 2) {
+        [[self getListByName:listname] editListPriority:itemIndex withPriority:newPriority];
+    } else if (editOption == 2) {
         printf("Input a new description for this item: \n");
-        [[self getListByName:listname] editListItemDescription:itemInput withString:[self parse]];
-    } else if (itemInput2 == 3) {
+        [[self getListByName:listname] editListItemDescription:itemIndex withString:[self parse]];
+    } else if (editOption == 3) {
         printf("Please enter 'y' if this item is done, or 'n' if the item is not done \n");
         myInput = [self parse];
         if ([myInput isEqualToString:@"y"]) {
-            [[self getListByName:listname] editListDoneStatus:itemInput withDoneStatus:YES];
+            [[self getListByName:listname] editListDoneStatus:itemIndex withDoneStatus:YES];
         } else if ([myInput isEqualToString:@"n"]) {
-            [[self getListByName:listname] editListDoneStatus:itemInput withDoneStatus:NO];
+            [[self getListByName:listname] editListDoneStatus:itemIndex withDoneStatus:NO];
         } else {
             printf("invalid input");
         }
