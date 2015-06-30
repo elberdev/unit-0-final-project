@@ -575,8 +575,8 @@
     printf("\n      edit items in <list name>\n");
     printf("\n      display all items <sort selector> first\n");
     printf("\n            sort selectors:\n\n");
-    printf("               high priority\n");
-    printf("               low priority\n");
+    printf("               high priority first\n");
+    printf("               low priority first\n");
 //    printf("               closest due date\n");
 //    printf("               farthest due date\n");
     printf("               done\n");
