@@ -197,6 +197,7 @@
         }
     }
     printf("\n  There are no lists by that name\n\n");
+
     [self commandTree:[self parse]];
     return nil;
 }
@@ -251,8 +252,8 @@
     
     if ([_listDatabase count] == 0) {
         printf("\n\n  NO TO-DO LISTS TO DISPLAY\n");
-    } else if ([listName isEqualToString:@"all"]) {
-        printf("\n\n  DISPLAYING ALL TO-DO LISTS\n");
+    } else if ([listName isEqualToString:@"summary"]) {
+        printf("\n\n  DISPLAYING LIST SUMMARY\n");
         for (int i = 0; i < [_listDatabase count]; i++) {
             printf("\n    %s: %lu items\n", [[_listDatabase[i] name] UTF8String],
                    (unsigned long)[_listDatabase[i] showNumberOfItems]);
@@ -290,10 +291,19 @@
 }
 
 -(void)displayItems:(NSString *)listName {
+    [self prioritySort:listName];
+    
     List *list = [self getListByName:listName];
     NSMutableArray *array = [list listArray];
     
     [self formatItems:array];
+}
+
+-(void)displayItemsWithSort:(NSString *)listName {
+    List *list = [self getListByName:listName];
+    NSMutableArray *array = [list listArray];
+    NSArray *sortedArray = [self sortItems:array];
+    [self formatItems:[NSMutableArray arrayWithArray:sortedArray]];
 }
 
 -(void)formatItems:(NSMutableArray *)array {
@@ -381,18 +391,28 @@
     if ([command containsString:@" high priority first"]) {
         _ascending = YES;
         _sortDescriptorKey = [NSString stringWithFormat:@"itemPriority"];
+        command = [self snip:@" high priority first" fromCommand:command];
     } else if ([command containsString:@" low priority first"]) {
         _ascending = NO;
         _sortDescriptorKey = [NSString stringWithFormat:@"itemPriority"];
+        command = [self snip:@" low priority first" fromCommand:command];
     } else if ([command containsString:@" not done first"]) {
         _ascending = YES;
         _sortDescriptorKey = [NSString stringWithFormat:@"doneStatus"];
+        command = [self snip:@" not done first" fromCommand:command];
     } else if ([command containsString:@" done first"]) {
         _ascending = NO;
         _sortDescriptorKey = [NSString stringWithFormat:@"doneStatus"];
+        command = [self snip:@" done first" fromCommand:command];
     } else {
         return;
     }
+    
+    // executes only when displaying an individual sorted list
+    if (![command isEqualToString:@""]) {
+        [self displayItemsWithSort:command];
+    }
+
 }
 
 -(void)displayAllItems:(NSString *)command {
@@ -551,24 +571,27 @@
 }
 
 -(void)help {
-    printf("\n\n  AVAILABLE COMMANDS:\n");
-    printf("\n      new list <list name>\n");
-    printf("\n      delete list <list name>\n");
-    printf("\n      rename list <list name>\n");
-    printf("\n      display list <list name / all>\n");
-    printf("\n      new item in <list name>\n");
-//    printf("\n      display items in <list name>\n");
-    printf("\n      delete items in <list name>\n");
-    printf("\n      edit items in <list name>\n");
-    printf("\n      display all items <sort selector> first\n");
-    printf("\n            sort selectors:\n\n");
-    printf("               high priority\n");
-    printf("               low priority\n");
+    printf("\n\n  GENERAL COMMANDS:\n");
+    printf("\n      display list summary\n");
+    printf("      display list <list name>\n");
+    printf("      new list <list name>\n");
+    printf("      delete list <list name>\n");
+    printf("      rename list <list name>\n");
+    printf("      display all items\n");
+    printf("      new item in <list name>\n");
+    printf("      edit items in <list name>\n");
+    printf("      delete items in <list name>\n");
+    printf("      exit\n");
+    printf("\n   SORTING COMMANDS:\n");
+    printf("\n      display list <list name> <sort selector> first\n");
+    printf("      display all items <sort selector> first\n");
+    printf("\n        SORT SELECTORS:\n\n");
+    printf("         high priority\n");
+    printf("         low priority\n");
 //    printf("               closest due date\n");
 //    printf("               farthest due date\n");
-    printf("               done\n");
-    printf("               not done\n");
-    printf("\n      exit \n\n");
+    printf("         done\n");
+    printf("         not done\n\n");
     [self commandTree:[self parse]];
 }
 
