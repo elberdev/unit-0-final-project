@@ -479,7 +479,7 @@
 
 -(void)editItemsInListSelector:(NSString*)listName {
     
-    int itemIndex;
+    int itemIndex = -1;
     int count;
     while (true) {
         count = [self displayItems:listName];
@@ -493,7 +493,7 @@
             printf("\n  INVALID INPUT");
     }
     
-    int editOption;
+    int editOption = -1;
     while (true) {
         printf("\n    What edit would you like to perform on that item?\n");
         printf("\n      1) Reassign priority\n");
@@ -511,7 +511,7 @@
     }
 
     if (editOption == 1) {
-        int newPriority;
+        int newPriority = -1;
         while (true) {
             printf("\n    Enter a value from 1 (greatest priority) to 4 (least priority)\n");
             printf("\n      ");
@@ -531,7 +531,7 @@
         [[self getListByName:listName] editListItemDescription:itemIndex
                                                     withString:[self parse]];
     } else if (editOption == 3) {
-        NSString *myInput;
+        NSString *myInput = @"z";
         while (true) {
             printf("\n    Please enter 'y' for done, or 'n' for not done \n");
             myInput = [self parse];
@@ -652,8 +652,6 @@
     printf("\n        SORT SELECTORS:\n\n");
     printf("         high priority\n");
     printf("         low priority\n");
-//    printf("               closest due date\n");
-//    printf("               farthest due date\n");
     printf("         done\n");
     printf("         not done\n\n");
 }
