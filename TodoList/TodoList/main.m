@@ -261,7 +261,7 @@
         }
     } else {
         printf("\n\n  DISPLAYING LIST %s\n", [listName UTF8String]);
-        [self displayItems:listName];
+        [self prioritySort:listName];
     }
     printf("\n");
 }
@@ -543,7 +543,7 @@
     } else if ([command containsString:@"rename list "]) {
         [self renameList:[self snip:@"rename list " fromCommand:command]];
     } else if ([command containsString:@"display list "]) {
-        [self prioritySort:[self snip:@"display list " fromCommand:command]];
+        [self displayList:[self snip:@"display list " fromCommand:command]];
     } else if ([command containsString:@"new item in "]) {
         [self newItem:[self snip:@"new item in " fromCommand:command]];
     } else if ([command containsString:@"delete items in "]) {
