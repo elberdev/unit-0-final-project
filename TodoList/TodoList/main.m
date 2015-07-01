@@ -191,15 +191,20 @@
 }
 
 -(List*)getListByName:(NSString*)listname {
+    
+    BOOL found = NO;
     List *list = [[List alloc]init];
+    
     for (int i = 0; i < [_listDatabase count]; i++) {
         if ([listname isEqualToString:[_listDatabase[i] name]]) {
+            found = YES;
             list = _listDatabase[i];
         }
     }
     
-    if (list == nil) {
+    if (found == NO) {
         printf("\n  There are no lists by that name\n\n");
+        return nil;
     }
 
     return list;
@@ -219,7 +224,6 @@
         return;
     }
     NSString *confirm;
-    
     while (true) {
         printf("\n\n  ARE YOU SURE YOU WANT TO DELETE LIST %s?\n",
                [listName UTF8String]);
@@ -260,6 +264,9 @@
                    (unsigned long)[_listDatabase[i] showNumberOfItems]);
         }
     } else {
+        if ([self getListByName:listName] == nil) {
+            return;
+        }
         printf("\n\n  DISPLAYING LIST %s\n", [listName UTF8String]);
         [self prioritySort:listName];
     }
@@ -267,7 +274,9 @@
 }
 
 -(void)newItem:(NSString *)listName {
-    [self getListByName:listName];
+    if ([self getListByName:listName] == nil) {
+        return;
+    }
     ListItem *newItem = [[ListItem alloc]init];
     
     printf("\n\n  CREATING NEW ITEM IN LIST %s\n", [listName UTF8String]);
@@ -366,7 +375,9 @@
 }
 
 -(void)deleteItems:(NSString *)listName {
-    [self getListByName:listName];
+    if ([self getListByName:listName] == nil) {
+        return;
+    }
     while (true) {
         printf("\n\n  DELETING ITEMS IN LIST %s\n", [listName UTF8String]);
         [self displayItems:listName];
@@ -515,14 +526,16 @@
     }
 }
 
--(void)editItemsInList:(NSString*)listname {
-    [self getListByName:listname];
+-(void)editItemsInList:(NSString*)listName {
+    if ([self getListByName:listName] == nil) {
+        return;
+    }
     while (true) {
-        printf("\n\n  EDITING ITEMS IN LIST %s\n", [listname UTF8String]);
-        [self displayItems:listname];
+        printf("\n\n  EDITING ITEMS IN LIST %s\n", [listName UTF8String]);
+        [self displayItems:listName];
         printf("    Please select an item to be edited:\n\n");
-        [self editItemsInListSelector:listname];
-        [self editItemPrompt:listname];
+        [self editItemsInListSelector:listName];
+        [self editItemPrompt:listName];
         
     }
 }
