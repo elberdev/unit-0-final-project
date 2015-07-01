@@ -191,14 +191,18 @@
 }
 
 -(List*)getListByName:(NSString*)listname {
+    List *list = [[List alloc]init];
     for (int i = 0; i < [_listDatabase count]; i++) {
         if ([listname isEqualToString:[_listDatabase[i] name]]) {
-            return _listDatabase[i];
+            list = _listDatabase[i];
         }
     }
-    printf("\n  There are no lists by that name\n\n");
-    [self commandTree:[self parse]];
-    return nil;
+    
+    if (list == nil) {
+        printf("\n  There are no lists by that name\n\n");
+    }
+
+    return list;
 }
 
 -(void)newList:(NSString *)newListName {
@@ -208,12 +212,12 @@
     [self addList:list];
     printf("\n\n  A NEW LIST HAS BEEN CREATED:\n");
     printf("\n      %s\n\n", [newListName UTF8String]);
-    
-    [self commandTree:[self parse]];
 }
 
 -(void)deleteList:(NSString *)listName {
-    [self getListByName:listName];
+    if ([self getListByName:listName] == nil) {
+        return;
+    }
     NSString *confirm;
     
     while (true) {
@@ -233,26 +237,24 @@
         }
     }
     printf("\n");
-    
-    [self commandTree:[self parse]];
 }
 
 -(void)renameList:(NSString *)listName {
-    [self getListByName:listName];
+    if ([self getListByName:listName] == nil) {
+        return;
+    }
     printf("\n\n  PLEASE ENTER NEW NAME FOR LIST %s\n", [listName UTF8String]);
     NSString *newName = [self parse];
     [[self getListByName:listName] setName:newName];
     printf("\n    List %s has been renamed %s\n\n", [listName UTF8String],
            [newName UTF8String]);
-    [self commandTree:[self parse]];
 }
 
 -(void)displayList:(NSString *)listName {
-    
     if ([_listDatabase count] == 0) {
         printf("\n\n  NO TO-DO LISTS TO DISPLAY\n");
-    } else if ([listName isEqualToString:@"all"]) {
-        printf("\n\n  DISPLAYING ALL TO-DO LISTS\n");
+    } else if ([listName isEqualToString:@"summary"]) {
+        printf("\n\n  DISPLAYING LIST SUMMARY\n");
         for (int i = 0; i < [_listDatabase count]; i++) {
             printf("\n    %s: %lu items\n", [[_listDatabase[i] name] UTF8String],
                    (unsigned long)[_listDatabase[i] showNumberOfItems]);
@@ -262,8 +264,6 @@
         [self displayItems:listName];
     }
     printf("\n");
-    
-    [self commandTree:[self parse]];
 }
 
 -(void)newItem:(NSString *)listName {
@@ -286,14 +286,30 @@
     [[[self getListByName:listName] listArray] addObject:newItem];
     
     printf("\n    to do item created successfully\n\n");
-    [self commandTree:[self parse]];
 }
 
 -(void)displayItems:(NSString *)listName {
     List *list = [self getListByName:listName];
+    if (list == nil) {
+        return;
+    }
+    
     NSMutableArray *array = [list listArray];
+    if (array == nil) {
+        return;
+    }
     
     [self formatItems:array];
+}
+
+-(void)displayItemsWithSort:(NSString *)listName {
+    List *list = [self getListByName:listName];
+    if (list == nil) {
+        return;
+    }
+    NSMutableArray *array = [list listArray];
+    NSArray *sortedArray = [self sortItems:array];
+    [self formatItems:[NSMutableArray arrayWithArray:sortedArray]];
 }
 
 -(void)formatItems:(NSMutableArray *)array {
@@ -378,21 +394,40 @@
 }
 
 -(void)prioritySort:(NSString *)command {
+    
+    BOOL sorting = NO;
+    
     if ([command containsString:@" high priority first"]) {
+        sorting = YES;
         _ascending = YES;
         _sortDescriptorKey = [NSString stringWithFormat:@"itemPriority"];
+        command = [self snip:@" high priority first" fromCommand:command];
     } else if ([command containsString:@" low priority first"]) {
+        sorting = YES;
         _ascending = NO;
         _sortDescriptorKey = [NSString stringWithFormat:@"itemPriority"];
+        command = [self snip:@" low priority first" fromCommand:command];
     } else if ([command containsString:@" not done first"]) {
+        sorting = YES;
         _ascending = YES;
         _sortDescriptorKey = [NSString stringWithFormat:@"doneStatus"];
+        command = [self snip:@" not done first" fromCommand:command];
     } else if ([command containsString:@" done first"]) {
+        sorting = YES;
         _ascending = NO;
         _sortDescriptorKey = [NSString stringWithFormat:@"doneStatus"];
+        command = [self snip:@" done first" fromCommand:command];
     } else {
-        return;
+        sorting = NO;
     }
+    
+    // executes only when displaying an individual sorted list
+    if (sorting == YES) {
+        [self displayItemsWithSort:command];
+    } else {
+        [self displayItems:command];
+    }
+
 }
 
 -(void)displayAllItems:(NSString *)command {
@@ -413,8 +448,8 @@
         combinedList = [NSMutableArray arrayWithArray:[self sortItems:combinedList]];
     }
     
+    printf("\n\n  DISPLAYING ALL ITEMS%s\n", [command UTF8String]);
     [self formatItems:combinedList];
-    [self commandTree:[self parse]];
 }
 
 -(void)editItemsInListSelector:(NSString*)listname {
@@ -508,7 +543,7 @@
     } else if ([command containsString:@"rename list "]) {
         [self renameList:[self snip:@"rename list " fromCommand:command]];
     } else if ([command containsString:@"display list "]) {
-        [self displayList:[self snip:@"display list " fromCommand:command]];
+        [self prioritySort:[self snip:@"display list " fromCommand:command]];
     } else if ([command containsString:@"new item in "]) {
         [self newItem:[self snip:@"new item in " fromCommand:command]];
     } else if ([command containsString:@"delete items in "]) {
@@ -522,7 +557,6 @@
     } else {
         printf("\n  NOT A RECOGNIZED COMMAND\n");
         printf("\n    Type 'help' for available commands\n\n");
-        [self commandTree:[self parse]];
     }
 }
 
@@ -551,31 +585,35 @@
 }
 
 -(void)help {
-    printf("\n\n  AVAILABLE COMMANDS:\n");
-    printf("\n      new list <list name>\n");
-    printf("\n      delete list <list name>\n");
-    printf("\n      rename list <list name>\n");
-    printf("\n      display list <list name / all>\n");
-    printf("\n      new item in <list name>\n");
-//    printf("\n      display items in <list name>\n");
-    printf("\n      delete items in <list name>\n");
-    printf("\n      edit items in <list name>\n");
-    printf("\n      display all items <sort selector> first\n");
-    printf("\n            sort selectors:\n\n");
-    printf("               high priority first\n");
-    printf("               low priority first\n");
+    printf("\n\n  GENERAL COMMANDS:\n");
+    printf("\n      display list summary\n");
+    printf("      display list <list name>\n");
+    printf("      new list <list name>\n");
+    printf("      delete list <list name>\n");
+    printf("      rename list <list name>\n");
+    printf("      display all items\n");
+    printf("      new item in <list name>\n");
+    printf("      edit items in <list name>\n");
+    printf("      delete items in <list name>\n");
+    printf("      exit\n");
+    printf("\n   SORTING COMMANDS:\n");
+    printf("\n      display list <list name> <sort selector> first\n");
+    printf("      display all items <sort selector> first\n");
+    printf("\n        SORT SELECTORS:\n\n");
+    printf("         high priority\n");
+    printf("         low priority\n");
 //    printf("               closest due date\n");
 //    printf("               farthest due date\n");
-    printf("               done\n");
-    printf("               not done\n");
-    printf("\n      exit \n\n");
-    [self commandTree:[self parse]];
+    printf("         done\n");
+    printf("         not done\n\n");
 }
 
 -(void)run {
     printf("\n  Welcome to the Elbo-Yucatan To-Do List Management System. \n");
     printf("\n    Type a command (or type 'help' for instructions)\n\n");
-    [self commandTree:[self parse]];
+    while (true) {
+        [self commandTree:[self parse]];
+    }
 }
 @end
 //************************** end ListManager class ***************************//
@@ -593,6 +631,7 @@ int main(int argc, const char * argv[]) {
         ListItem *item3 = [[ListItem alloc] init];
         [item3 setItemDescription:@"call Robin"];
         [item3 setItemPriority:4];
+        [item3 setDoneStatus:YES];
         ListItem *item4 = [[ListItem alloc] init];
         [item4 setItemDescription:@"polish bat-mobile"];
         ListItem *item5 = [[ListItem alloc] init];
@@ -606,6 +645,7 @@ int main(int argc, const char * argv[]) {
         ListItem *item8 = [[ListItem alloc] init];
         [item8 setItemDescription:@"buy flowers for catwoman"];
         [item8 setItemPriority:3];
+        [item8 setDoneStatus:YES];
         ListItem *item9 = [[ListItem alloc] init];
         [item9 setItemDescription:@"fire alfred"];
         [item9 setItemPriority:2];
