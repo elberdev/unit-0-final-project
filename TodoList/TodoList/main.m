@@ -264,10 +264,6 @@
                    (unsigned long)[_listDatabase[i] showNumberOfItems]);
         }
     } else {
-        if ([self getListByName:listName] == nil) {
-            return;
-        }
-        printf("\n\n  DISPLAYING LIST %s\n", [listName UTF8String]);
         [self prioritySort:listName];
     }
     printf("\n");
@@ -302,20 +298,18 @@
     if (list == nil) {
         return;
     }
-    
+    printf("\n\n  DISPLAYING LIST %s\n", [listName UTF8String]);
     NSMutableArray *array = [list listArray];
-    if (array == nil) {
-        return;
-    }
-    
     [self formatItems:array];
 }
 
--(void)displayItemsWithSort:(NSString *)listName {
+-(void)displayItems:(NSString *)listName withSort:(NSString *)sortDescriptor {
     List *list = [self getListByName:listName];
     if (list == nil) {
         return;
     }
+    printf("\n\n  DISPLAYING LIST %s,%s\n", [listName UTF8String],
+           [sortDescriptor UTF8String]);
     NSMutableArray *array = [list listArray];
     NSArray *sortedArray = [self sortItems:array];
     [self formatItems:[NSMutableArray arrayWithArray:sortedArray]];
@@ -406,24 +400,29 @@
 
 -(void)prioritySort:(NSString *)command {
     
+    NSString *sortDescriptor = [[NSString alloc] init];
     BOOL sorting = NO;
     
     if ([command containsString:@" high priority first"]) {
+        sortDescriptor = @" high priority first";
         sorting = YES;
         _ascending = YES;
         _sortDescriptorKey = [NSString stringWithFormat:@"itemPriority"];
         command = [self snip:@" high priority first" fromCommand:command];
     } else if ([command containsString:@" low priority first"]) {
+        sortDescriptor = @" low priority first";
         sorting = YES;
         _ascending = NO;
         _sortDescriptorKey = [NSString stringWithFormat:@"itemPriority"];
         command = [self snip:@" low priority first" fromCommand:command];
     } else if ([command containsString:@" not done first"]) {
+        sortDescriptor = @" not done first";
         sorting = YES;
         _ascending = YES;
         _sortDescriptorKey = [NSString stringWithFormat:@"doneStatus"];
         command = [self snip:@" not done first" fromCommand:command];
     } else if ([command containsString:@" done first"]) {
+        sortDescriptor = @" done first";
         sorting = YES;
         _ascending = NO;
         _sortDescriptorKey = [NSString stringWithFormat:@"doneStatus"];
@@ -434,7 +433,7 @@
     
     // executes only when displaying an individual sorted list
     if (sorting == YES) {
-        [self displayItemsWithSort:command];
+        [self displayItems:command withSort:sortDescriptor];
     } else {
         [self displayItems:command];
     }
