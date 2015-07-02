@@ -5,8 +5,12 @@
 //  Created by Elber Carneiro and Jackie Meggesto on 6/25/15.
 //  Copyright (c) 2015 Jackie Meggesto and Elber Carneiro. All rights reserved.
 //
+//  TicTacToe class created by Kaira and Christella on
+//  Copyright (c) 2015 Kaira and Christella. All rights reserved.
+//
 
 #import <Foundation/Foundation.h>
+#import "TicTacToe.h"
 
 //*************************** listItem class *********************************//
 @interface ListItem : NSObject
@@ -602,6 +606,9 @@
                      withSort:YES];
     } else if ([command containsString:@"edit items in "]) {
         [self editItemsInList:[self snip:@"edit items in " fromCommand:command]];
+    } else if ([command isEqualToString:@"up up down down left right left right A B"]) {
+        TicTacToe *tictactoe = [[TicTacToe alloc]init];
+        [tictactoe run];
     } else if ([command isEqualToString:@"exit"]) {
         exit(0);
     } else {
@@ -731,7 +738,8 @@ int main(int argc, const char * argv[]) {
         [myListManager addList:list2];
 
         [myListManager run];
-        /// yo yo yo 
+        /// yo yo yo
+
 
     }
     return 0;

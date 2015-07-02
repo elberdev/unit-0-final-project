@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3B413D521B45FDC5002B310C /* TicTacToe.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B413D511B45FDC5002B310C /* TicTacToe.m */; };
 		8D9789F71B3C9A7F007CF4CF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8D9789F61B3C9A7F007CF4CF /* main.m */; };
 /* End PBXBuildFile section */
 
@@ -23,6 +24,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3B413D501B45FDC5002B310C /* TicTacToe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TicTacToe.h; sourceTree = "<group>"; };
+		3B413D511B45FDC5002B310C /* TicTacToe.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TicTacToe.m; sourceTree = "<group>"; };
 		8D9789F31B3C9A7F007CF4CF /* TodoList */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TodoList; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D9789F61B3C9A7F007CF4CF /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -58,6 +61,8 @@
 			isa = PBXGroup;
 			children = (
 				8D9789F61B3C9A7F007CF4CF /* main.m */,
+				3B413D501B45FDC5002B310C /* TicTacToe.h */,
+				3B413D511B45FDC5002B310C /* TicTacToe.m */,
 			);
 			path = TodoList;
 			sourceTree = "<group>";
@@ -118,6 +123,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3B413D521B45FDC5002B310C /* TicTacToe.m in Sources */,
 				8D9789F71B3C9A7F007CF4CF /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -235,6 +241,7 @@
 				8D9789FC1B3C9A7F007CF4CF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
